@@ -1,4 +1,4 @@
-SRC := netctl.c wifi.m
+SRC := netctl.c wifi.m cellular.m
 
 all: netctl
 
