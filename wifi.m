@@ -6,6 +6,11 @@
 int info(WiFiNetworkRef network, WiFiDeviceClientRef client, bool status);
 
 int wifi(int argc, char *argv[]) {
+	if (!argv[2]) {
+		errx(1, "no wifi subcommand specified");
+		return 1;
+	}
+
 	int ret = 1;
 	WiFiManagerRef manager = WiFiManagerClientCreate(kCFAllocatorDefault, 0);
 	// WiFiManagerClientGetDevice(WiFiManagerRef) segfaults
