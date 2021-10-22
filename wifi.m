@@ -3,6 +3,7 @@
 #import <Foundation/Foundation.h>
 #import <MobileWiFi/MobileWiFi.h>
 
+int list(WiFiManagerRef manager);
 int info(WiFiNetworkRef network, WiFiDeviceClientRef client, bool status);
 
 int wifi(int argc, char *argv[]) {
@@ -20,13 +21,24 @@ int wifi(int argc, char *argv[]) {
 		errx(1, "Failed to get devices");
 	}
 	WiFiDeviceClientRef client = (WiFiDeviceClientRef)CFArrayGetValueAtIndex(devices, 0);
+
 	if (!strcmp(argv[2], "current")) {
 		ret = info(WiFiDeviceClientCopyCurrentNetwork(client), client, true);
-		CFRelease(manager);
-		return(ret);
+	} else if (!strcmp(argv[2], "list")) {
+		ret = list(manager);
 	}
 	CFRelease(manager);
-	return(1);
+	return ret;
+}
+
+int list(WiFiManagerRef manager) {
+	CFArrayRef networks = WiFiManagerClientCopyNetworks(manager);
+
+	for (int i = 0; i < CFArrayGetCount(networks); i++) {
+		printf("%s\n", [(NSString *)CFBridgingRelease(WiFiNetworkGetSSID((WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i))) UTF8String]);
+	}
+
+	return 0;
 }
 
 int info(WiFiNetworkRef network, WiFiDeviceClientRef client, bool status) {
