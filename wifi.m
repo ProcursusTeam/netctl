@@ -43,7 +43,6 @@ int list(WiFiManagerRef manager) {
 
 int info(WiFiNetworkRef network, WiFiDeviceClientRef client, bool status) {
 	printf("SSID: %s\n", [(NSString*)CFBridgingRelease(WiFiNetworkGetSSID(network)) UTF8String]);
-	printf("Password: %s\n", [(NSString*)CFBridgingRelease(WiFiNetworkCopyPassword(network)) UTF8String]);
 	printf("WEP: %s\n", WiFiNetworkIsWEP(network) ? "yes" : "no");
 	printf("WPA: %s\n", WiFiNetworkIsWPA(network) ? "yes" : "no");
 	printf("EAP: %s\n", WiFiNetworkIsEAP(network) ? "yes" : "no");
