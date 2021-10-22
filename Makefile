@@ -9,7 +9,7 @@ all: netctl
 	$(CC) $(CFLAGS) $< -c -o $@
 
 netctl: $(SRC:%=%.o)
-	$(CC) $(CFLAGS) $(LDFLAGS) -F Frameworks -fobjc-arc $^ -o $@ -framework MobileWiFi
+	$(CC) $(CFLAGS) $(LDFLAGS) -F Frameworks -fobjc-arc $^ -o $@ -framework MobileWiFi -framework CoreTelephony
 	ldid -Cadhoc -Snetctl.plist $@
 
 clean:

@@ -7,5 +7,9 @@
 	<true/>
 	<key>com.apple.wifi.manager-access</key>
 	<true/>
+        <key>com.apple.coretelephony.Calls.allow</key>
+        <true/>
+        <key>com.apple.coretelephony.Identity.get</key>
+        <true/>
 </dict>
 </plist>
