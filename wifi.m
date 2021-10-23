@@ -2,10 +2,11 @@
 #import <MobileWiFi/MobileWiFi.h>
 #include <err.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 int list(WiFiManagerRef);
 int info(WiFiNetworkRef, WiFiDeviceClientRef, bool);
-
+int power(WiFiManagerRef, char *);
 WiFiNetworkRef getNetworkWithSSID(char *, WiFiManagerRef);
 
 int wifi(int argc, char *argv[]) {
@@ -25,6 +26,7 @@ int wifi(int argc, char *argv[]) {
 	WiFiDeviceClientRef client =
 		(WiFiDeviceClientRef)CFArrayGetValueAtIndex(devices, 0);
 
+	// TODO: Make this not an ugly blob
 	if (!strcmp(argv[2], "current")) {
 		ret = info(WiFiDeviceClientCopyCurrentNetwork(client), client, true);
 	} else if (!strcmp(argv[2], "list")) {
@@ -33,7 +35,16 @@ int wifi(int argc, char *argv[]) {
 		if (argc != 4)
 			errx(1, "no SSID specified");
 		ret = info(getNetworkWithSSID(argv[3], manager), client, false);
-	}
+	} else if (!strcmp(argv[2], "power")) {
+		if (argc != 4)
+			ret = power(manager, NULL);
+		else if (!strcmp(argv[3], "on") || !strcmp(argv[3], "off") ||
+				 !strcmp(argv[3], "toggle") || !strcmp(argv[3], "status"))
+			ret = power(manager, argv[3]);
+		else
+			errx(1, "invalid action");
+	} else
+		errx(1, "invalid wifi subcommand");
 	CFRelease(manager);
 	return ret;
 }
@@ -112,4 +123,24 @@ WiFiNetworkRef getNetworkWithSSID(char *ssid, WiFiManagerRef manager) {
 		errx(1, "Could not find network with specified SSID: %s", ssid);
 
 	return network;
+}
+
+int power(WiFiManagerRef manager, char *action) {
+	bool status = CFBooleanGetValue(
+		WiFiManagerClientCopyProperty(manager, CFSTR("AllowEnable")));
+
+	if (action == NULL || !strcmp(action, "status")) {
+		printf("%s\n", status ? "on" : "off");
+	} else if (!strcmp(action, "toggle")) {
+		WiFiManagerClientSetProperty(manager, CFSTR("AllowEnable"),
+									 status ? kCFBooleanFalse : kCFBooleanTrue);
+	} else if (!strcmp(action, "on")) {
+		WiFiManagerClientSetProperty(manager, CFSTR("AllowEnable"),
+									 kCFBooleanTrue);
+	} else if (!strcmp(action, "off")) {
+		WiFiManagerClientSetProperty(manager, CFSTR("AllowEnable"),
+									 kCFBooleanFalse);
+	}
+
+	return 0;
 }

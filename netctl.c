@@ -10,8 +10,7 @@ int main(int argc, char *argv[]) {
 
 	if (!strcmp(argv[1], "wifi"))
 		return wifi(argc, argv);
-
-	if (!strcmp(argv[1], "cellular"))
+	else if (!strcmp(argv[1], "cellular"))
 		return cellular(argc, argv);
 
 	errx(1, "invalid subcommand");

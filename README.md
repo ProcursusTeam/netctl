@@ -5,6 +5,6 @@
 * [x] `netctl wifi list`
 * [ ] `netctl wifi connect SSID`
 * [ ] `netctl wifi scan`
-* [ ] `netctl wifi on/off`
+* [x] `netctl wifi power status/on/off/toggle`
 * [ ] `netctl cellular info`
 * [x] `netctl cellular number`
