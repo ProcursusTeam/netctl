@@ -17,4 +17,7 @@ netctl: $(SRC:%=%.o)
 clean:
 	rm -rf netctl *.dSYM $(SRC:%=%.o)
 
-.PHONY: all clean
+format:
+	clang-format -i $(SRC)
+
+.PHONY: all clean format

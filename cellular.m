@@ -1,5 +1,5 @@
-#include <Foundation/Foundation.h>
 #include <CoreTelephony/CTPrivate.h>
+#include <Foundation/Foundation.h>
 #include <err.h>
 
 int cellular(int argc, char** argv) {

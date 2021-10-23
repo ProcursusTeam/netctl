@@ -1,8 +1,8 @@
 #include <err.h>
 #include <string.h>
 
-int wifi(int, char**);
-int cellular(int, char**);
+int wifi(int, char **);
+int cellular(int, char **);
 
 int main(int argc, char *argv[]) {
 	if (argc < 2)

@@ -1,10 +1,10 @@
-#include <stdbool.h>
-#include <err.h>
 #import <Foundation/Foundation.h>
 #import <MobileWiFi/MobileWiFi.h>
+#include <err.h>
+#include <stdbool.h>
 
-int list(WiFiManagerRef manager);
-int info(WiFiNetworkRef network, WiFiDeviceClientRef client, bool status);
+int list(WiFiManagerRef);
+int info(WiFiNetworkRef, WiFiDeviceClientRef, bool);
 
 WiFiNetworkRef getNetworkWithSSID(char *, WiFiManagerRef);
 
@@ -22,7 +22,8 @@ int wifi(int argc, char *argv[]) {
 	if (!devices) {
 		errx(1, "Failed to get devices");
 	}
-	WiFiDeviceClientRef client = (WiFiDeviceClientRef)CFArrayGetValueAtIndex(devices, 0);
+	WiFiDeviceClientRef client =
+		(WiFiDeviceClientRef)CFArrayGetValueAtIndex(devices, 0);
 
 	if (!strcmp(argv[2], "current")) {
 		ret = info(WiFiDeviceClientCopyCurrentNetwork(client), client, true);
@@ -41,28 +42,37 @@ int list(WiFiManagerRef manager) {
 	CFArrayRef networks = WiFiManagerClientCopyNetworks(manager);
 
 	for (int i = 0; i < CFArrayGetCount(networks); i++) {
-		printf("%s\n", [(NSString *)CFBridgingRelease(WiFiNetworkGetSSID((WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i))) UTF8String]);
+		printf("%s\n", [(NSString *)CFBridgingRelease(WiFiNetworkGetSSID(
+						   (WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)))
+						   UTF8String]);
 	}
 
 	return 0;
 }
 
 int info(WiFiNetworkRef network, WiFiDeviceClientRef client, bool status) {
-	printf("SSID: %s\n", [(NSString*)CFBridgingRelease(WiFiNetworkGetSSID(network)) UTF8String]);
+	printf("SSID: %s\n", [(NSString *)CFBridgingRelease(
+							 WiFiNetworkGetSSID(network)) UTF8String]);
 	printf("WEP: %s\n", WiFiNetworkIsWEP(network) ? "yes" : "no");
 	printf("WPA: %s\n", WiFiNetworkIsWPA(network) ? "yes" : "no");
 	printf("EAP: %s\n", WiFiNetworkIsEAP(network) ? "yes" : "no");
-	printf("Apple Hotspot: %s\n", WiFiNetworkIsApplePersonalHotspot(network) ? "yes" : "no");
+	printf("Apple Hotspot: %s\n",
+		   WiFiNetworkIsApplePersonalHotspot(network) ? "yes" : "no");
 	printf("Adhoc: %s\n", WiFiNetworkIsAdHoc(network) ? "yes" : "no");
 	printf("Hidden: %s\n", WiFiNetworkIsHidden(network) ? "yes" : "no");
-	printf("Password Requires: %s\n", WiFiNetworkRequiresPassword(network) ? "yes" : "no");
-	printf("Username Required: %s\n", WiFiNetworkRequiresUsername(network) ? "yes" : "no");
+	printf("Password Requires: %s\n",
+		   WiFiNetworkRequiresPassword(network) ? "yes" : "no");
+	printf("Username Required: %s\n",
+		   WiFiNetworkRequiresUsername(network) ? "yes" : "no");
 
 	if (status) {
-		CFDictionaryRef data = (CFDictionaryRef)WiFiDeviceClientCopyProperty(client, CFSTR("RSSI"));
-		CFNumberRef scaled = (CFNumberRef)WiFiDeviceClientCopyProperty(client, kWiFiScaledRSSIKey);
+		CFDictionaryRef data = (CFDictionaryRef)WiFiDeviceClientCopyProperty(
+			client, CFSTR("RSSI"));
+		CFNumberRef scaled = (CFNumberRef)WiFiDeviceClientCopyProperty(
+			client, kWiFiScaledRSSIKey);
 
-		CFNumberRef RSSI = (CFNumberRef)CFDictionaryGetValue(data, CFSTR("RSSI_CTL_AGR"));
+		CFNumberRef RSSI =
+			(CFNumberRef)CFDictionaryGetValue(data, CFSTR("RSSI_CTL_AGR"));
 		CFRelease(data);
 
 		int raw;
@@ -89,8 +99,10 @@ WiFiNetworkRef getNetworkWithSSID(char *ssid, WiFiManagerRef manager) {
 	CFArrayRef networks = WiFiManagerClientCopyNetworks(manager);
 
 	for (int i = 0; i < CFArrayGetCount(networks); i++) {
-		if (CFEqual(CFStringCreateWithCString(kCFAllocatorDefault, ssid, kCFStringEncodingUTF8),
-					WiFiNetworkGetSSID((WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)))) {
+		if (CFEqual(CFStringCreateWithCString(kCFAllocatorDefault, ssid,
+											  kCFStringEncodingUTF8),
+					WiFiNetworkGetSSID(
+						(WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)))) {
 			network = (WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i);
 			break;
 		}
