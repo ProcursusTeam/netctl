@@ -6,6 +6,8 @@
 int list(WiFiManagerRef manager);
 int info(WiFiNetworkRef network, WiFiDeviceClientRef client, bool status);
 
+WiFiNetworkRef getNetworkWithSSID(char *, WiFiManagerRef);
+
 int wifi(int argc, char *argv[]) {
 	if (!argv[2]) {
 		errx(1, "no wifi subcommand specified");
@@ -26,6 +28,10 @@ int wifi(int argc, char *argv[]) {
 		ret = info(WiFiDeviceClientCopyCurrentNetwork(client), client, true);
 	} else if (!strcmp(argv[2], "list")) {
 		ret = list(manager);
+	} else if (!strcmp(argv[2], "info")) {
+		if (argc != 4)
+			errx(1, "no SSID specified");
+		ret = info(getNetworkWithSSID(argv[3], manager), client, false);
 	}
 	CFRelease(manager);
 	return ret;
@@ -76,4 +82,22 @@ int info(WiFiNetworkRef network, WiFiDeviceClientRef client, bool status) {
 		printf("Bars: %d\n", bars);
 	}
 	return 0;
+}
+
+WiFiNetworkRef getNetworkWithSSID(char *ssid, WiFiManagerRef manager) {
+	WiFiNetworkRef network;
+	CFArrayRef networks = WiFiManagerClientCopyNetworks(manager);
+
+	for (int i = 0; i < CFArrayGetCount(networks); i++) {
+		if (CFEqual(CFStringCreateWithCString(kCFAllocatorDefault, ssid, kCFStringEncodingUTF8),
+					WiFiNetworkGetSSID((WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)))) {
+			network = (WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i);
+			break;
+		}
+	}
+
+	if (network == NULL)
+		errx(1, "Could not find network with specified SSID: %s", ssid);
+
+	return network;
 }
