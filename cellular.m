@@ -52,6 +52,48 @@ static int call(NSString* number) {
 	return 0;
 }
 
+static int cells(void) {
+	int success = 0;
+	CFArrayRef cells;
+	_CTServerConnectionCellMonitorCopyCellInfo(serverConnection, &success, &cells);
+	if (!success) {
+		errx(1, "could not get cell info");
+		return 1;
+	}
+
+	int ctr = 1;
+	for (NSDictionary* cell in (__bridge NSArray*)cells) {
+		int bandinfo = [cell[kCTCellMonitorBandInfo] intValue];
+		int bandwidth = [cell[kCTCellMonitorBandwidth] intValue];
+		int cellID = [cell[kCTCellMonitorCellId] intValue];
+		NSString* cellTechnology = [cell[kCTCellMonitorCellRadioAccessTechnology] componentsSeparatedByString:@"kCTCellMonitorRadioAccessTechnology"][1];
+		NSString* cellType = cell[kCTCellMonitorCellType];
+		int mcc = [cell[kCTCellMonitorMCC] intValue];
+		int mnc = [cell[kCTCellMonitorMNC] intValue];
+		int pid = [cell[kCTCellMonitorPID] intValue];
+		int tac = [cell[kCTCellMonitorTAC] intValue];
+		int uarfcn = [cell[kCTCellMonitorUARFCN] intValue];
+
+		printf( "Cell %d:\n"
+			"\tBandinfo: %d\n"
+			"\tBandwidth: %d\n"
+			  "\tCell ID: %d\n"
+		  "\tCell Technology: %s\n"
+			"\tCell Type: %s\n"
+			      "\tMCC: %d\n"
+			      "\tMNC: %d\n"
+			      "\tPID: %d\n"
+			      "\tTAC: %d\n"
+			   "\tUARFCN: %d\n",
+			   ctr, bandinfo, bandwidth, cellID, [cellTechnology UTF8String], [cellType UTF8String], mcc, mnc, pid, tac, uarfcn);
+		ctr++;
+	}
+
+	CFRelease(cells);
+
+	return 0;
+}
+
 int cellular(int argc, char** argv) {
 	const char* cmd = argv[2];
 	int ret = 0;
@@ -78,6 +120,10 @@ int cellular(int argc, char** argv) {
 		}
 
 		return call([NSString stringWithUTF8String:argv[3]]);
+	}
+
+	if (!strcmp(cmd, "cells")) {
+		return cells();
 	}
 
 	errx(1, "invalid cellular subcommand");
