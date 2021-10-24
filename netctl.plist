@@ -16,5 +16,9 @@
 		<string>cellular-plan</string>
     		<string>spi</string>
 	</array>
+	<key>com.apple.security.exception.mach-lookup.global-name</key>
+	<array>
+                <string>com.apple.commcenter.carrierspace.xpc</string>
+	</array>
 </dict>
 </plist>
