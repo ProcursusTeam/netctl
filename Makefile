@@ -14,7 +14,7 @@ all: netctl
 
 netctl: $(SRC:%=%.o)
 	$(CC) $(CFLAGS) $(LDFLAGS) -F Frameworks -fobjc-arc $^ -o $@ -framework MobileWiFi -framework CoreTelephony
-	ldid -Cadhoc -Snetctl.plist $@
+	ldid -Cadhoc -Sentitlements.plist $@
 
 clean:
 	rm -rf netctl *.dSYM $(SRC:%=%.o)
