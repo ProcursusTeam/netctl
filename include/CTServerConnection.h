@@ -48,8 +48,18 @@ extern "C" {
 		int c2;
 	};
 
-	extern CFStringRef kCTIndicatorRadioTransmitNotification;
-	extern CFStringRef kCTRadioTransmitDCHStatus;
+	extern NSString* kCTIndicatorRadioTransmitNotification;
+	extern NSString* kCTRadioTransmitDCHStatus;
+	extern NSString* kCTCellMonitorBandInfo;
+    	extern NSString* kCTCellMonitorBandwidth;
+    	extern NSString* kCTCellMonitorCellId;
+    	extern NSString* kCTCellMonitorCellRadioAccessTechnology;
+    	extern NSString* kCTCellMonitorCellType;
+    	extern NSString* kCTCellMonitorMCC;
+	extern NSString* kCTCellMonitorMNC;
+    	extern NSString* kCTCellMonitorPID;
+    	extern NSString* kCTCellMonitorTAC;
+    	extern NSString* kCTCellMonitorUARFCN;
 	
 	typedef struct __CellInfo CellInfo;
 	
@@ -71,8 +81,10 @@ extern "C" {
 	void _CTServerConnectionCellMonitorGetCellCount(CFMachPortRef *port, CTServerConnectionRef connection, int *cellInfoCount);
 	void _CTServerConnectionCellMonitorGetCellInfo(CFMachPortRef *port, CTServerConnectionRef connection, int cellInfoNumber, void *buffer);
 
+
 	void _CTServerConnectionIsInHomeCountry(CTServerConnectionRef ref, bool* res);
 	void _CTServerConnectionGetRegistrationStatus(CTServerConnectionRef ref, CFStringRef* status);
+	void _CTServerConnectionCellMonitorCopyCellInfo(CTServerConnectionRef ref, int* success, CFArrayRef* cells);
 
 #if __cplusplus
 }
