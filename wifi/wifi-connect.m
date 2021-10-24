@@ -5,13 +5,21 @@
 
 #include "wifi.h"
 
+void connectScanCallback(WiFiDeviceClientRef, CFArrayRef, CFErrorRef, void *);
+void connectCallback(WiFiDeviceClientRef, WiFiNetworkRef, CFDictionaryRef, int,
+					 const void *);
+
 int connect(WiFiDeviceClientRef client, int argc, char **argv) {
 	int ch;
+	char *password = NULL;
 	bool bssid = false;
-	while ((ch = getopt(argc, argv, "bs")) != -1) {
+	while ((ch = getopt(argc, argv, "bp:s")) != -1) {
 		switch (ch) {
 			case 'b':
 				bssid = true;
+				break;
+			case 'p':
+				password = optarg;
 				break;
 			case 's':
 				bssid = false;

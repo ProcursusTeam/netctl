@@ -5,6 +5,8 @@
 
 #include "wifi.h"
 
+void scanCallback(WiFiDeviceClientRef, CFArrayRef, CFErrorRef, void *);
+
 int scan(WiFiDeviceClientRef client) {
 	WiFiManagerClientScheduleWithRunLoop(manager, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
 
