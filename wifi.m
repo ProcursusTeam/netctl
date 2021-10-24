@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 int list();
-int info(WiFiNetworkRef, WiFiDeviceClientRef, bool);
+int info(WiFiDeviceClientRef, bool, int, char **);
 int power(char *);
 int scan(WiFiDeviceClientRef);
 int connect(WiFiDeviceClientRef, int, char **);
@@ -40,13 +40,11 @@ int wifi(int argc, char *argv[]) {
 
 	// TODO: Make this not an ugly blob
 	if (!strcmp(argv[2], "current")) {
-		ret = info(WiFiDeviceClientCopyCurrentNetwork(client), client, true);
+		ret = info(client, true, argc - 2, argv + 2);
+	} else if (!strcmp(argv[2], "info")) {
+		ret = info(client, false, argc - 2, argv + 2);
 	} else if (!strcmp(argv[2], "list")) {
 		ret = list();
-	} else if (!strcmp(argv[2], "info")) {
-		if (argc != 4)
-			errx(1, "no SSID specified");
-		ret = info(getNetworkWithSSID(argv[3]), client, false);
 	} else if (!strcmp(argv[2], "power")) {
 		if (argc != 4)
 			ret = power(NULL);
@@ -81,7 +79,66 @@ int list() {
 	return 0;
 }
 
-int info(WiFiNetworkRef network, WiFiDeviceClientRef client, bool current) {
+int info(WiFiDeviceClientRef client, bool current, int argc, char **argv) {
+	WiFiNetworkRef network;
+	int ch;
+	char *key = NULL;
+
+	while ((ch = getopt(argc, argv, "k:")) != -1) {
+		switch (ch) {
+			case 'k':
+				key = optarg;
+				break;
+		}
+	}
+	argc -= optind;
+	argv += optind;
+
+	if (!current && argv[0] == NULL) errx(1, "no SSID specified");
+
+	if (current)
+		network = WiFiDeviceClientCopyCurrentNetwork(client);
+	else
+		network = getNetworkWithSSID(argv[0]);
+
+	if (key != NULL) {
+		CFPropertyListRef property = WiFiNetworkGetProperty(
+			network, (__bridge CFStringRef)[NSString stringWithUTF8String:key]);
+		if (!property) errx(1, "cannot get property \"%s\"", key);
+
+		CFTypeID type = CFGetTypeID(property);
+
+		if (type == CFStringGetTypeID()) {
+			printf("%s: %s\n", key,
+				[(NSString *)CFBridgingRelease(WiFiNetworkGetProperty(
+					network,
+					(__bridge CFStringRef)[NSString stringWithUTF8String:key]))
+					UTF8String]);
+		} else if (type == CFNumberGetTypeID()) {
+			printf("%s: %i\n", key,
+				[(NSNumber *)CFBridgingRelease(WiFiNetworkGetProperty(
+					network,
+					(__bridge CFStringRef)[NSString stringWithUTF8String:key]))
+					intValue]);
+		} else if (type == CFDateGetTypeID()) {
+			printf("%s: %s\n", key,
+				[(NSDate *)CFBridgingRelease(WiFiNetworkGetProperty(
+					 network,
+					 (__bridge CFStringRef)[NSString stringWithUTF8String:key]))
+					description]
+					.UTF8String);
+		} else if (type == CFBooleanGetTypeID()) {
+			printf("%s: %s\n", key,
+				CFBooleanGetValue(WiFiNetworkGetProperty(
+					network,
+					(__bridge CFStringRef)[NSString stringWithUTF8String:key]))
+					? "true"
+					: "false");
+		} else
+			errx(1, "unknown return type");
+		return 0;
+	}
+
 	printf("SSID: %s\n", [(NSString *)CFBridgingRelease(
 							 WiFiNetworkGetSSID(network)) UTF8String]);
 	printf("BSSID: %s\n", networkBSSID(network));
