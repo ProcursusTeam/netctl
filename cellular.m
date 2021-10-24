@@ -4,6 +4,8 @@
 #include <Foundation/Foundation.h>
 #include <err.h>
 
+static CTServerConnectionRef serverConnection;
+
 static int number(void) {
 	printf("%s\n", [(NSString*)CFBridgingRelease(CTSettingCopyMyPhoneNumber()) UTF8String]);
 	return 0;
@@ -14,11 +16,19 @@ static int info(void) {
 	NSDictionary<NSString*, CTCarrier*>* serviceTech = info.serviceSubscriberCellularProviders;
 	NSDictionary<NSString*, NSString*>* accessTechnology = info.serviceCurrentRadioAccessTechnology;
 
+
 	long int raw = 0, graded = 0, bars = 0;
+	bool inHomeCountry = false;
+	CFStringRef registrationStatus = nil;
 
 	CTIndicatorsGetSignalStrength(&raw, &graded, &bars);
+	_CTServerConnectionIsInHomeCountry(serverConnection, &inHomeCountry);
+	_CTServerConnectionGetRegistrationStatus(serverConnection, &registrationStatus);
 
-	printf("Connection strength: %ld%%\n\n", bars * 25);
+	printf("Connection Strength: %ld%%\n", bars * 25);
+	printf("In Home Country: %s\n", inHomeCountry ? "Yes" : "No");
+	printf("Registration status: %s\n", [(__bridge NSString*)registrationStatus UTF8String]);
+	printf("\n");
 
 	int i = 0;
 	for (NSString* key in serviceTech) {
@@ -32,6 +42,7 @@ static int info(void) {
 		i++;
 	}
 
+	CFRelease(registrationStatus);
 	return 0;
 }
 
@@ -49,6 +60,8 @@ int cellular(int argc, char** argv) {
 		errx(1, "no cellular subcommand specified");
 		return 1;
 	}
+
+	serverConnection = _CTServerConnectionCreate(NULL, NULL, NULL);
 
 	if (!strcmp(cmd, "number")) {
 		return number();

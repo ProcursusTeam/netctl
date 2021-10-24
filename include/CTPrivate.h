@@ -1,9 +1,9 @@
 #include <Foundation/Foundation.h>
+#include "CTServerConnection.h"
 
 CFStringRef CTSettingCopyMyPhoneNumber(void);
 int CTGetSignalStrength(void);
 void CTIndicatorsGetSignalStrength(long int* raw, long int* graded, long int* bars);
-int _CTServerConnectionGetSignalStrength(void);
 CFStringRef CTRegistrationGetStatus(void);
 
 typedef enum {
