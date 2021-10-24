@@ -8,3 +8,4 @@
 * [x] `netctl wifi power status/on/off/toggle`
 * [ ] `netctl cellular info`
 * [x] `netctl cellular number`
+* [ ] `netctl cellular call`
