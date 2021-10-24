@@ -1,3 +1,10 @@
+#import <CoreFoundation/CoreFoundation.h>
+#import <Foundation/Foundation.h>
+#import <MobileWiFi/MobileWiFi.h>
+#include <err.h>
+
+#include "wifi.h"
+
 int info(WiFiDeviceClientRef client, bool current, int argc, char **argv) {
 	WiFiNetworkRef network;
 	int ch;
