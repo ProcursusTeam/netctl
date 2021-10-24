@@ -15,6 +15,9 @@ void connectCallback(WiFiDeviceClientRef, WiFiNetworkRef, CFDictionaryRef, int,
 					 const void *);
 WiFiNetworkRef getNetworkWithSSID(char *);
 
+const char *networkBSSID(WiFiNetworkRef network);
+CFStringRef networkBSSIDRef(WiFiNetworkRef);
+
 CFArrayRef connectNetworks;
 WiFiManagerRef manager;
 
@@ -69,12 +72,10 @@ int list() {
 
 	for (int i = 0; i < CFArrayGetCount(networks); i++) {
 		printf("%s : %s\n",
-			   [(NSString *)CFBridgingRelease(WiFiNetworkGetSSID(
-				   (WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)))
-				   UTF8String],
-			   [(NSString *)CFBridgingRelease(WiFiNetworkGetProperty(
-				   (WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i),
-				   CFSTR("BSSID"))) UTF8String]);
+			[(NSString *)CFBridgingRelease(WiFiNetworkGetSSID(
+				(WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)))
+				UTF8String],
+			networkBSSID((WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)));
 	}
 
 	return 0;
@@ -83,8 +84,7 @@ int list() {
 int info(WiFiNetworkRef network, WiFiDeviceClientRef client, bool current) {
 	printf("SSID: %s\n", [(NSString *)CFBridgingRelease(
 							 WiFiNetworkGetSSID(network)) UTF8String]);
-	printf("BSSID: %s\n", [(NSString *)CFBridgingRelease(WiFiNetworkGetProperty(
-							  network, CFSTR("BSSID"))) UTF8String]);
+	printf("BSSID: %s\n", networkBSSID(network));
 	printf("WEP: %s\n", WiFiNetworkIsWEP(network) ? "yes" : "no");
 	printf("WPA: %s\n", WiFiNetworkIsWPA(network) ? "yes" : "no");
 	printf("EAP: %s\n", WiFiNetworkIsEAP(network) ? "yes" : "no");
@@ -128,6 +128,9 @@ int info(WiFiNetworkRef network, WiFiDeviceClientRef client, bool current) {
 		printf("AP Mode: %i\n",
 			   [(NSNumber *)CFBridgingRelease(WiFiNetworkGetProperty(
 				   network, CFSTR("AP_MODE"))) intValue]);
+		printf("Interface: %s\n",
+			   [(NSString *)CFBridgingRelease(
+				   WiFiDeviceClientGetInterfaceName(client)) UTF8String]);
 	}
 	return 0;
 }
@@ -190,12 +193,9 @@ void scanCallback(WiFiDeviceClientRef client, CFArrayRef results,
 
 	for (int i = 0; i < CFArrayGetCount(results); i++) {
 		printf("%s : %s\n",
-			   [(NSString *)CFBridgingRelease(WiFiNetworkGetSSID(
-				   (WiFiNetworkRef)CFArrayGetValueAtIndex(results, i)))
-				   UTF8String],
-			   [(NSString *)CFBridgingRelease(WiFiNetworkGetProperty(
-				   (WiFiNetworkRef)CFArrayGetValueAtIndex(results, i),
-				   CFSTR("BSSID"))) UTF8String]);
+			[(NSString *)CFBridgingRelease(WiFiNetworkGetSSID((
+				WiFiNetworkRef)CFArrayGetValueAtIndex(results, i))) UTF8String],
+			networkBSSID((WiFiNetworkRef)CFArrayGetValueAtIndex(results, i)));
 	}
 
 	WiFiManagerClientUnscheduleFromRunLoop(manager);
@@ -282,4 +282,12 @@ void connectCallback(WiFiDeviceClientRef device, WiFiNetworkRef network,
 	WiFiManagerClientUnscheduleFromRunLoop(manager);
 	CFRunLoopStop(CFRunLoopGetCurrent());
 	exit(error);
+}
+
+const char *networkBSSID(WiFiNetworkRef network) {
+	return [(NSString *)CFBridgingRelease(networkBSSIDRef(network)) UTF8String];
+}
+
+CFStringRef networkBSSIDRef(WiFiNetworkRef network) {
+	return WiFiNetworkGetProperty(network, CFSTR("BSSID"));
 }
