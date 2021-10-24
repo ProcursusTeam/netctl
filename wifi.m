@@ -54,9 +54,11 @@ int wifi(int argc, char *argv[]) {
 			errx(1, "invalid action");
 	} else if (!strcmp(argv[2], "scan"))
 		ret = scan(client);
-	else if (!strcmp(argv[2], "connect")) {
+	else if (!strcmp(argv[2], "connect"))
 		ret = connect(client, argc - 2, argv + 2);
-	} else
+	else if (!strcmp(argv[2], "disconnect"))
+		ret = WiFiDeviceClientDisassociate(client);
+	else
 		errx(1, "invalid wifi subcommand");
 	CFRelease(manager);
 	return ret;
