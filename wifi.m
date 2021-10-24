@@ -70,7 +70,7 @@ int list() {
 	return 0;
 }
 
-int info(WiFiNetworkRef network, WiFiDeviceClientRef client, bool status) {
+int info(WiFiNetworkRef network, WiFiDeviceClientRef client, bool current) {
 	printf("SSID: %s\n", [(NSString *)CFBridgingRelease(
 							 WiFiNetworkGetSSID(network)) UTF8String]);
 	printf("BSSID: %s\n", [(NSString*)CFBridgingRelease(
@@ -87,7 +87,7 @@ int info(WiFiNetworkRef network, WiFiDeviceClientRef client, bool status) {
 	printf("Username Required: %s\n",
 		   WiFiNetworkRequiresUsername(network) ? "yes" : "no");
 
-	if (status) {
+	if (current) {
 		CFDictionaryRef data = (CFDictionaryRef)WiFiDeviceClientCopyProperty(
 			client, CFSTR("RSSI"));
 		CFNumberRef scaled = (CFNumberRef)WiFiDeviceClientCopyProperty(
@@ -112,6 +112,8 @@ int info(WiFiNetworkRef network, WiFiDeviceClientRef client, bool status) {
 
 		printf("Strength: %f dBm\n", strength);
 		printf("Bars: %d\n", bars);
+		printf("Channel: %i\n", [(NSNumber*)CFBridgingRelease(WiFiNetworkGetProperty(network, CFSTR("CHANNEL"))) intValue]);
+		printf("AP Mode: %i\n", [(NSNumber*)CFBridgingRelease(WiFiNetworkGetProperty(network, CFSTR("AP_MODE"))) intValue]);
 	}
 	return 0;
 }
