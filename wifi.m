@@ -59,12 +59,13 @@ int list() {
 	CFArrayRef networks = WiFiManagerClientCopyNetworks(manager);
 
 	for (int i = 0; i < CFArrayGetCount(networks); i++) {
-		printf("%s : %s\n", [(NSString *)CFBridgingRelease(WiFiNetworkGetSSID(
-						   (WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)))
-						   UTF8String],
-							 [(NSString *)CFBridgingRelease(WiFiNetworkGetProperty(
-						   (WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i), CFSTR("BSSID")))
-						   UTF8String]);
+		printf("%s : %s\n",
+			   [(NSString *)CFBridgingRelease(WiFiNetworkGetSSID(
+				   (WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)))
+				   UTF8String],
+			   [(NSString *)CFBridgingRelease(WiFiNetworkGetProperty(
+				   (WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i),
+				   CFSTR("BSSID"))) UTF8String]);
 	}
 
 	return 0;
@@ -73,8 +74,8 @@ int list() {
 int info(WiFiNetworkRef network, WiFiDeviceClientRef client, bool current) {
 	printf("SSID: %s\n", [(NSString *)CFBridgingRelease(
 							 WiFiNetworkGetSSID(network)) UTF8String]);
-	printf("BSSID: %s\n", [(NSString*)CFBridgingRelease(
-							WiFiNetworkGetProperty(network, CFSTR("BSSID"))) UTF8String]);
+	printf("BSSID: %s\n", [(NSString *)CFBridgingRelease(WiFiNetworkGetProperty(
+							  network, CFSTR("BSSID"))) UTF8String]);
 	printf("WEP: %s\n", WiFiNetworkIsWEP(network) ? "yes" : "no");
 	printf("WPA: %s\n", WiFiNetworkIsWPA(network) ? "yes" : "no");
 	printf("EAP: %s\n", WiFiNetworkIsEAP(network) ? "yes" : "no");
@@ -112,8 +113,12 @@ int info(WiFiNetworkRef network, WiFiDeviceClientRef client, bool current) {
 
 		printf("Strength: %f dBm\n", strength);
 		printf("Bars: %d\n", bars);
-		printf("Channel: %i\n", [(NSNumber*)CFBridgingRelease(WiFiNetworkGetProperty(network, CFSTR("CHANNEL"))) intValue]);
-		printf("AP Mode: %i\n", [(NSNumber*)CFBridgingRelease(WiFiNetworkGetProperty(network, CFSTR("AP_MODE"))) intValue]);
+		printf("Channel: %i\n",
+			   [(NSNumber *)CFBridgingRelease(WiFiNetworkGetProperty(
+				   network, CFSTR("CHANNEL"))) intValue]);
+		printf("AP Mode: %i\n",
+			   [(NSNumber *)CFBridgingRelease(WiFiNetworkGetProperty(
+				   network, CFSTR("AP_MODE"))) intValue]);
 	}
 	return 0;
 }
@@ -165,17 +170,21 @@ int scan(WiFiDeviceClientRef client) {
 	return 0;
 }
 
-void scanCallback(WiFiDeviceClientRef client, CFArrayRef results, CFErrorRef error, void *token) {
+void scanCallback(WiFiDeviceClientRef client, CFArrayRef results,
+				  CFErrorRef error, void *token) {
 	if ((NSError *)CFBridgingRelease(error))
-		errx(1, "Failed to scan: %s", [[(NSError *)CFBridgingRelease(error) localizedDescription] UTF8String]);
+		errx(1, "Failed to scan: %s",
+			 [[(NSError *)CFBridgingRelease(error) localizedDescription]
+				 UTF8String]);
 
 	for (int i = 0; i < CFArrayGetCount(results); i++) {
-		printf("%s : %s\n", [(NSString *)CFBridgingRelease(WiFiNetworkGetSSID(
-						   (WiFiNetworkRef)CFArrayGetValueAtIndex(results, i)))
-						   UTF8String],
-							 [(NSString *)CFBridgingRelease(WiFiNetworkGetProperty(
-						   (WiFiNetworkRef)CFArrayGetValueAtIndex(results, i), CFSTR("BSSID")))
-						   UTF8String]);
+		printf("%s : %s\n",
+			   [(NSString *)CFBridgingRelease(WiFiNetworkGetSSID(
+				   (WiFiNetworkRef)CFArrayGetValueAtIndex(results, i)))
+				   UTF8String],
+			   [(NSString *)CFBridgingRelease(WiFiNetworkGetProperty(
+				   (WiFiNetworkRef)CFArrayGetValueAtIndex(results, i),
+				   CFSTR("BSSID"))) UTF8String]);
 	}
 
 	WiFiManagerClientUnscheduleFromRunLoop(manager);

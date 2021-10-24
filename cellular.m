@@ -1,7 +1,7 @@
-#include <Foundation/Foundation.h>
 #include <CTPrivate.h>
 #include <CoreTelephony/CTCarrier.h>
 #include <CoreTelephony/CTTelephonyNetworkInfo.h>
+#include <Foundation/Foundation.h>
 #include <err.h>
 
 static int number(void) {
