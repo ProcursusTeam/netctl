@@ -26,9 +26,13 @@ void scanCallback(WiFiDeviceClientRef client, CFArrayRef results,
 				 UTF8String]);
 
 	for (int i = 0; i < CFArrayGetCount(results); i++) {
-		printf("%s : %s\n",
-			[(NSString *)CFBridgingRelease(WiFiNetworkGetSSID((
-				WiFiNetworkRef)CFArrayGetValueAtIndex(results, i))) UTF8String],
+		NSString* SSID = (NSString*)CFBridgingRelease(WiFiNetworkGetSSID( (WiFiNetworkRef)CFArrayGetValueAtIndex(results, i) ));
+		if ([SSID length] == 0) {
+			SSID = @"<hidden>";
+		}
+
+		printf("%s: %s\n",
+			[SSID UTF8String],
 			networkBSSID((WiFiNetworkRef)CFArrayGetValueAtIndex(results, i)));
 	}
 
