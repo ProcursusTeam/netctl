@@ -5,7 +5,7 @@ SRC := netctl.c wifi.m cellular.m
 all: netctl
 
 %.m.o: %.m
-	$(CC) $(CFLAGS) -F Frameworks -fobjc-arc $< -c -o $@
+	$(CC) $(CFLAGS) -Iinclude -F Frameworks -fobjc-arc $< -c -o $@
 
 %.c.o: %.c
 	$(CC) $(CFLAGS) $< -c -o $@
