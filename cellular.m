@@ -5,7 +5,7 @@
 #include <err.h>
 
 static int number(void) {
-	printf("%s\n", [CTSettingCopyMyPhoneNumber() UTF8String]);
+	printf("%s\n", [(NSString*)CFBridgingRelease(CTSettingCopyMyPhoneNumber()) UTF8String]);
 	return 0;
 }
 
@@ -37,7 +37,7 @@ static int info(void) {
 
 static int call(NSString* number) {
 	CTCallRef call = CTCallDial(number);
-	printf("Calling %s...\n", CTCallCopyAddress(nil, call).UTF8String);
+	printf("Calling %s...\n", [(NSString*)CFBridgingRelease(CTCallCopyAddress(nil, call)) UTF8String]);
 	return 0;
 }
 
