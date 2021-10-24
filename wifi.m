@@ -4,10 +4,14 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-int list(WiFiManagerRef);
+int list();
 int info(WiFiNetworkRef, WiFiDeviceClientRef, bool);
-int power(WiFiManagerRef, char *);
-WiFiNetworkRef getNetworkWithSSID(char *, WiFiManagerRef);
+int power(char *);
+int scan(WiFiDeviceClientRef);
+void scanCallback(WiFiDeviceClientRef, CFArrayRef, CFErrorRef, void *);
+WiFiNetworkRef getNetworkWithSSID(char *);
+
+WiFiManagerRef manager;
 
 int wifi(int argc, char *argv[]) {
 	if (!argv[2]) {
@@ -16,7 +20,7 @@ int wifi(int argc, char *argv[]) {
 	}
 
 	int ret = 1;
-	WiFiManagerRef manager = WiFiManagerClientCreate(kCFAllocatorDefault, 0);
+	manager = WiFiManagerClientCreate(kCFAllocatorDefault, 0);
 	// WiFiManagerClientGetDevice(WiFiManagerRef) segfaults
 	// We should investigate, but this works for now.
 	CFArrayRef devices = WiFiManagerClientCopyDevices(manager);
@@ -30,31 +34,36 @@ int wifi(int argc, char *argv[]) {
 	if (!strcmp(argv[2], "current")) {
 		ret = info(WiFiDeviceClientCopyCurrentNetwork(client), client, true);
 	} else if (!strcmp(argv[2], "list")) {
-		ret = list(manager);
+		ret = list();
 	} else if (!strcmp(argv[2], "info")) {
 		if (argc != 4)
 			errx(1, "no SSID specified");
-		ret = info(getNetworkWithSSID(argv[3], manager), client, false);
+		ret = info(getNetworkWithSSID(argv[3]), client, false);
 	} else if (!strcmp(argv[2], "power")) {
 		if (argc != 4)
-			ret = power(manager, NULL);
+			ret = power(NULL);
 		else if (!strcmp(argv[3], "on") || !strcmp(argv[3], "off") ||
 				 !strcmp(argv[3], "toggle") || !strcmp(argv[3], "status"))
-			ret = power(manager, argv[3]);
+			ret = power(argv[3]);
 		else
 			errx(1, "invalid action");
-	} else
+	} else if (!strcmp(argv[2], "scan"))
+		ret = scan(client);
+	else
 		errx(1, "invalid wifi subcommand");
 	CFRelease(manager);
 	return ret;
 }
 
-int list(WiFiManagerRef manager) {
+int list() {
 	CFArrayRef networks = WiFiManagerClientCopyNetworks(manager);
 
 	for (int i = 0; i < CFArrayGetCount(networks); i++) {
-		printf("%s\n", [(NSString *)CFBridgingRelease(WiFiNetworkGetSSID(
+		printf("%s : %s\n", [(NSString *)CFBridgingRelease(WiFiNetworkGetSSID(
 						   (WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)))
+						   UTF8String],
+							 [(NSString *)CFBridgingRelease(WiFiNetworkGetProperty(
+						   (WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i), CFSTR("BSSID")))
 						   UTF8String]);
 	}
 
@@ -64,6 +73,8 @@ int list(WiFiManagerRef manager) {
 int info(WiFiNetworkRef network, WiFiDeviceClientRef client, bool status) {
 	printf("SSID: %s\n", [(NSString *)CFBridgingRelease(
 							 WiFiNetworkGetSSID(network)) UTF8String]);
+	printf("BSSID: %s\n", [(NSString*)CFBridgingRelease(
+							WiFiNetworkGetProperty(network, CFSTR("BSSID"))) UTF8String]);
 	printf("WEP: %s\n", WiFiNetworkIsWEP(network) ? "yes" : "no");
 	printf("WPA: %s\n", WiFiNetworkIsWPA(network) ? "yes" : "no");
 	printf("EAP: %s\n", WiFiNetworkIsEAP(network) ? "yes" : "no");
@@ -105,15 +116,13 @@ int info(WiFiNetworkRef network, WiFiDeviceClientRef client, bool status) {
 	return 0;
 }
 
-WiFiNetworkRef getNetworkWithSSID(char *ssid, WiFiManagerRef manager) {
+WiFiNetworkRef getNetworkWithSSID(char *ssid) {
 	WiFiNetworkRef network;
 	CFArrayRef networks = WiFiManagerClientCopyNetworks(manager);
 
 	for (int i = 0; i < CFArrayGetCount(networks); i++) {
-		if (CFEqual(CFStringCreateWithCString(kCFAllocatorDefault, ssid,
-											  kCFStringEncodingUTF8),
-					WiFiNetworkGetSSID(
-						(WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)))) {
+		if (CFEqual(CFStringCreateWithCString(kCFAllocatorDefault, ssid, kCFStringEncodingUTF8),
+					WiFiNetworkGetSSID((WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)))) {
 			network = (WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i);
 			break;
 		}
@@ -125,7 +134,7 @@ WiFiNetworkRef getNetworkWithSSID(char *ssid, WiFiManagerRef manager) {
 	return network;
 }
 
-int power(WiFiManagerRef manager, char *action) {
+int power(char *action) {
 	bool status = CFBooleanGetValue(
 		WiFiManagerClientCopyProperty(manager, CFSTR("AllowEnable")));
 
@@ -143,4 +152,30 @@ int power(WiFiManagerRef manager, char *action) {
 	}
 
 	return 0;
+}
+
+int scan(WiFiDeviceClientRef client) {
+	WiFiManagerClientScheduleWithRunLoop(manager, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+
+	WiFiDeviceClientScanAsync(client, (__bridge CFDictionaryRef)[NSDictionary dictionary], scanCallback, 0);
+	CFRunLoopRun();
+
+	return 0;
+}
+
+void scanCallback(WiFiDeviceClientRef client, CFArrayRef results, CFErrorRef error, void *token) {
+	if ((NSError *)CFBridgingRelease(error))
+		errx(1, "Failed to scan: %s", [[(NSError *)CFBridgingRelease(error) localizedDescription] UTF8String]);
+
+	for (int i = 0; i < CFArrayGetCount(results); i++) {
+		printf("%s : %s\n", [(NSString *)CFBridgingRelease(WiFiNetworkGetSSID(
+						   (WiFiNetworkRef)CFArrayGetValueAtIndex(results, i)))
+						   UTF8String],
+							 [(NSString *)CFBridgingRelease(WiFiNetworkGetProperty(
+						   (WiFiNetworkRef)CFArrayGetValueAtIndex(results, i), CFSTR("BSSID")))
+						   UTF8String]);
+	}
+
+	WiFiManagerClientUnscheduleFromRunLoop(manager);
+	CFRunLoopStop(CFRunLoopGetCurrent());
 }

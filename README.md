@@ -4,7 +4,7 @@
 * [x] `netctl wifi current`
 * [x] `netctl wifi list`
 * [ ] `netctl wifi connect SSID`
-* [ ] `netctl wifi scan`
+* [x] `netctl wifi scan`
 * [x] `netctl wifi power status/on/off/toggle`
 * [ ] `netctl cellular info`
 * [x] `netctl cellular number`
