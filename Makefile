@@ -1,8 +1,8 @@
 CC  ?= xcrun -sdk iphoneos cc -arch arm64
 
 SRC := netctl.c
-SRC += cellular.m
-SRC += wifi.m wifi-connect.m wifi-scan.m wifi-power.m wifi-info.m
+SRC += cellular/cellular.m
+SRC += wifi/wifi.m wifi/wifi-connect.m wifi/wifi-scan.m wifi/wifi-power.m wifi/wifi-info.m
 
 all: netctl
 
