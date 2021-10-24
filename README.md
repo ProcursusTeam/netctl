@@ -1,7 +1,9 @@
 # TODO:
 
 * [x] `netctl wifi info SSID`
+* [ ] `netctl wifi info -k key SSID`
 * [x] `netctl wifi current`
+* [ ] `netctl wifi current -k key`
 * [x] `netctl wifi list`
 * [x] `netctl wifi connect SSID` (known networks)
 * [x] `netctl wifi disconnect SSID`
