@@ -8,9 +8,14 @@ int list();
 int info(WiFiNetworkRef, WiFiDeviceClientRef, bool);
 int power(char *);
 int scan(WiFiDeviceClientRef);
+int connect(WiFiDeviceClientRef, int, char **);
 void scanCallback(WiFiDeviceClientRef, CFArrayRef, CFErrorRef, void *);
+void connectScanCallback(WiFiDeviceClientRef, CFArrayRef, CFErrorRef, void *);
+void connectCallback(WiFiDeviceClientRef, WiFiNetworkRef, CFDictionaryRef, int,
+					 const void *);
 WiFiNetworkRef getNetworkWithSSID(char *);
 
+CFArrayRef connectNetworks;
 WiFiManagerRef manager;
 
 int wifi(int argc, char *argv[]) {
@@ -49,7 +54,9 @@ int wifi(int argc, char *argv[]) {
 			errx(1, "invalid action");
 	} else if (!strcmp(argv[2], "scan"))
 		ret = scan(client);
-	else
+	else if (!strcmp(argv[2], "connect")) {
+		ret = connect(client, argc - 2, argv + 2);
+	} else
 		errx(1, "invalid wifi subcommand");
 	CFRelease(manager);
 	return ret;
@@ -83,7 +90,7 @@ int info(WiFiNetworkRef network, WiFiDeviceClientRef client, bool current) {
 		   WiFiNetworkIsApplePersonalHotspot(network) ? "yes" : "no");
 	printf("Adhoc: %s\n", WiFiNetworkIsAdHoc(network) ? "yes" : "no");
 	printf("Hidden: %s\n", WiFiNetworkIsHidden(network) ? "yes" : "no");
-	printf("Password Requires: %s\n",
+	printf("Password Required: %s\n",
 		   WiFiNetworkRequiresPassword(network) ? "yes" : "no");
 	printf("Username Required: %s\n",
 		   WiFiNetworkRequiresUsername(network) ? "yes" : "no");
@@ -164,7 +171,9 @@ int power(char *action) {
 int scan(WiFiDeviceClientRef client) {
 	WiFiManagerClientScheduleWithRunLoop(manager, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
 
-	WiFiDeviceClientScanAsync(client, (__bridge CFDictionaryRef)[NSDictionary dictionary], scanCallback, 0);
+	WiFiDeviceClientScanAsync(
+		client, (__bridge CFDictionaryRef)[NSDictionary dictionary],
+		scanCallback, 0);
 	CFRunLoopRun();
 
 	return 0;
@@ -189,4 +198,86 @@ void scanCallback(WiFiDeviceClientRef client, CFArrayRef results,
 
 	WiFiManagerClientUnscheduleFromRunLoop(manager);
 	CFRunLoopStop(CFRunLoopGetCurrent());
+}
+
+int connect(WiFiDeviceClientRef client, int argc, char **argv) {
+	int ch;
+	bool bssid = false;
+	while ((ch = getopt(argc, argv, "bs")) != -1) {
+		switch (ch) {
+			case 'b':
+				bssid = true;
+				break;
+			case 's':
+				bssid = false;
+				break;
+		}
+	}
+	argc -= optind;
+	argv += optind;
+
+	if (argv[0] == NULL)
+		errx(1, "specify a SSID or BSSID");
+
+	WiFiManagerClientScheduleWithRunLoop(manager, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+	WiFiDeviceClientScanAsync(
+		client, (__bridge CFDictionaryRef)[NSDictionary dictionary],
+		connectScanCallback, 0);
+	CFRunLoopRun();
+
+	WiFiNetworkRef network;
+
+	for (int i = 0; i < CFArrayGetCount(connectNetworks); i++) {
+		if (bssid) {
+			if (CFEqual(CFStringCreateWithCString(kCFAllocatorDefault, argv[0],
+												  kCFStringEncodingUTF8),
+						WiFiNetworkGetProperty(
+							(WiFiNetworkRef)CFArrayGetValueAtIndex(
+								connectNetworks, i),
+							CFSTR("BSSID")))) {
+				network = (WiFiNetworkRef)CFArrayGetValueAtIndex(connectNetworks, i);
+				goto cont;
+			}
+		} else {
+			if (CFEqual(
+					CFStringCreateWithCString(kCFAllocatorDefault, argv[0], kCFStringEncodingUTF8),
+					WiFiNetworkGetSSID((WiFiNetworkRef)CFArrayGetValueAtIndex(connectNetworks, i)))) {
+				network = (WiFiNetworkRef)CFArrayGetValueAtIndex(connectNetworks, i);
+				goto cont;
+			}
+		}
+	}
+
+	errx(1, "cannot find network %s", argv[0]);
+
+cont:
+	if (CFEqual(network, WiFiDeviceClientCopyCurrentNetwork(client)))
+		WiFiDeviceClientDisassociate(client);
+
+	WiFiManagerClientScheduleWithRunLoop(manager, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+
+	WiFiDeviceClientAssociateAsync(client, network, connectCallback, NULL);
+	CFRunLoopRun();
+
+	return 0;
+}
+
+void connectScanCallback(WiFiDeviceClientRef client, CFArrayRef results,
+						 CFErrorRef error, void *token) {
+	if ((NSError *)CFBridgingRelease(error))
+		errx(1, "Failed to scan: %s",
+			 [[(NSError *)CFBridgingRelease(error) localizedDescription]
+				 UTF8String]);
+
+	connectNetworks = CFArrayCreateCopy(kCFAllocatorDefault, results);
+
+	WiFiManagerClientUnscheduleFromRunLoop(manager);
+	CFRunLoopStop(CFRunLoopGetCurrent());
+}
+
+void connectCallback(WiFiDeviceClientRef device, WiFiNetworkRef network,
+					 CFDictionaryRef dict, int error, const void *object) {
+	WiFiManagerClientUnscheduleFromRunLoop(manager);
+	CFRunLoopStop(CFRunLoopGetCurrent());
+	exit(error);
 }
