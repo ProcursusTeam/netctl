@@ -11,5 +11,10 @@
         <true/>
         <key>com.apple.coretelephony.Identity.get</key>
         <true/>
+    	<key>com.apple.CommCenter.fine-grained</key>
+	<array>
+		<string>cellular-plan</string>
+    		<string>spi</string>
+	</array>
 </dict>
 </plist>
