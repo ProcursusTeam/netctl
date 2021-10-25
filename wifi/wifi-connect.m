@@ -64,11 +64,12 @@ int connect(WiFiDeviceClientRef client, int argc, char **argv) {
 	errx(1, "cannot find network %s", argv[0]);
 
 cont:
-	if (CFEqual(network, WiFiDeviceClientCopyCurrentNetwork(client)))
-		WiFiDeviceClientDisassociate(client);
+	WiFiManagerClientAddNetwork(manager, network);
+
+	if (password != NULL)
+		WiFiNetworkSetPassword(network, (__bridge CFStringRef)[NSString stringWithUTF8String:password]);
 
 	WiFiManagerClientScheduleWithRunLoop(manager, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
-
 	WiFiDeviceClientAssociateAsync(client, network, connectCallback, NULL);
 	CFRunLoopRun();
 
@@ -92,5 +93,6 @@ void connectCallback(WiFiDeviceClientRef device, WiFiNetworkRef network,
 					 CFDictionaryRef dict, int error, const void *object) {
 	WiFiManagerClientUnscheduleFromRunLoop(manager);
 	CFRunLoopStop(CFRunLoopGetCurrent());
-	exit(error);
+	if (error != 0)
+		errx(1, "Failed to connect: %d", error);
 }
