@@ -94,6 +94,25 @@ static int cells(void) {
 	return 0;
 }
 
+static int registration(NSString* arg) {
+	if ([arg isEqualToString:@"enable"]) {
+		_CTServerConnectionEnableRegistration(serverConnection);
+	}
+
+	else if ([arg isEqualToString:@"disable"]) {
+		_CTServerConnectionDisableRegistration(serverConnection);
+	}
+
+	else {
+		errx(1, "must specify 'disable' or 'enable'");
+	}
+
+	// we do a little race conditioning
+	usleep(50000);
+
+	return 0;
+}
+
 int cellular(int argc, char** argv) {
 	const char* cmd = argv[2];
 	int ret = 0;
@@ -124,6 +143,15 @@ int cellular(int argc, char** argv) {
 
 	if (!strcmp(cmd, "cells")) {
 		return cells();
+	}
+
+	if (!strcmp(cmd, "registration")) {
+		if (argc < 4) {
+			errx(1, "must specify 'disable' or 'enable'");
+			return 1;
+		}
+
+		return registration([NSString stringWithUTF8String:argv[3]]);
 	}
 
 	errx(1, "invalid cellular subcommand");

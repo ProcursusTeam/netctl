@@ -85,6 +85,8 @@ extern "C" {
 	void _CTServerConnectionIsInHomeCountry(CTServerConnectionRef ref, bool* res);
 	void _CTServerConnectionGetRegistrationStatus(CTServerConnectionRef ref, CFStringRef* status);
 	void _CTServerConnectionCellMonitorCopyCellInfo(CTServerConnectionRef ref, int* success, CFArrayRef* cells);
+	void _CTServerConnectionEnableRegistration(CTServerConnectionRef ref);
+	void _CTServerConnectionDisableRegistration(CTServerConnectionRef ref);
 
 #if __cplusplus
 }
