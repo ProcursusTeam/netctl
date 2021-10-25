@@ -90,40 +90,42 @@ int info(WiFiDeviceClientRef client, bool current, int argc, char **argv) {
 	printf("Username Required: %s\n",
 		   WiFiNetworkRequiresUsername(network) ? "yes" : "no");
 
-	if (current) {
-		CFDictionaryRef data = (CFDictionaryRef)WiFiDeviceClientCopyProperty(
-			client, CFSTR("RSSI"));
-		CFNumberRef scaled = (CFNumberRef)WiFiDeviceClientCopyProperty(
-			client, kWiFiScaledRSSIKey);
+	CFDictionaryRef data = (CFDictionaryRef)WiFiDeviceClientCopyProperty(
+		client, CFSTR("RSSI"));
+	CFNumberRef scaled = (CFNumberRef)WiFiDeviceClientCopyProperty(
+		client, kWiFiScaledRSSIKey);
 
-		CFNumberRef RSSI =
-			(CFNumberRef)CFDictionaryGetValue(data, CFSTR("RSSI_CTL_AGR"));
-		CFRelease(data);
+	CFNumberRef RSSI =
+		(CFNumberRef)CFDictionaryGetValue(data, CFSTR("RSSI_CTL_AGR"));
+	CFRelease(data);
 
-		int raw;
-		CFNumberGetValue(RSSI, kCFNumberIntType, &raw);
+	int raw;
+	CFNumberGetValue(RSSI, kCFNumberIntType, &raw);
 
-		float strength;
-		CFNumberGetValue(scaled, kCFNumberFloatType, &strength);
-		CFRelease(scaled);
+	float strength;
+	CFNumberGetValue(scaled, kCFNumberFloatType, &strength);
+	CFRelease(scaled);
 
-		strength *= -1;
+	strength *= -1;
 
-		// Apple uses -3.0.
-		int bars = (int)ceilf(strength * -3.0f);
-		bars = MAX(1, MIN(bars, 3));
+	// Apple uses -3.0.
+	int bars = (int)ceilf(strength * -3.0f);
+	bars = MAX(1, MIN(bars, 3));
 
-		printf("Strength: %f dBm\n", strength);
-		printf("Bars: %d\n", bars);
-		printf("Channel: %i\n",
-			   [(NSNumber *)CFBridgingRelease(WiFiNetworkGetProperty(
-				   network, CFSTR("CHANNEL"))) intValue]);
-		printf("AP Mode: %i\n",
-			   [(NSNumber *)CFBridgingRelease(WiFiNetworkGetProperty(
-				   network, CFSTR("AP_MODE"))) intValue]);
-		printf("Interface: %s\n",
-			   [(NSString *)CFBridgingRelease(
-				   WiFiDeviceClientGetInterfaceName(client)) UTF8String]);
-	}
+	printf("Strength: %f dBm\n", strength);
+	printf("Bars: %d\n", bars);
+	printf("Channel: %i\n",
+		   [(NSNumber *)CFBridgingRelease(WiFiNetworkGetProperty(
+			   network, CFSTR("CHANNEL"))) intValue]);
+	printf("AP Mode: %i\n",
+		   [(NSNumber *)CFBridgingRelease(WiFiNetworkGetProperty(
+			   network, CFSTR("AP_MODE"))) intValue]);
+	printf("Interface: %s\n",
+		   [(NSString *)CFBridgingRelease(
+			   WiFiDeviceClientGetInterfaceName(client)) UTF8String]);
+	printf("Last Association Date: %s\n",
+		   [(NSDate *)CFBridgingRelease(
+				 WiFiNetworkGetLastAssociationDate(network)) descriptionWithLocale:nil].UTF8String);
+
 	return 0;
 }
