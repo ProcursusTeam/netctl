@@ -74,7 +74,7 @@ static int cells(void) {
 		int tac = [cell[kCTCellMonitorTAC] intValue];
 		int uarfcn = [cell[kCTCellMonitorUARFCN] intValue];
 
-		printf( "Cell %d:\n"
+		printf( "Current Cell:\n"
 			"\tBandinfo: %d\n"
 			"\tBandwidth: %d\n"
 			  "\tCell ID: %d\n"
