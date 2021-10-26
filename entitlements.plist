@@ -7,19 +7,22 @@
 	<true/>
 	<key>com.apple.wifi.manager-access</key>
 	<true/>
-        <key>com.apple.coretelephony.Calls.allow</key>
-        <true/>
-        <key>com.apple.coretelephony.Identity.get</key>
-        <true/>
-    	<key>com.apple.CommCenter.fine-grained</key>
+	<key>com.apple.private.corewifi.internal</key>
+	<true/>
+	<key>com.apple.coretelephony.Calls.allow</key>
+	<true/>
+	<key>com.apple.coretelephony.Identity.get</key>
+	<true/>
+	<key>com.apple.CommCenter.fine-grained</key>
 	<array>
 		<string>cellular-plan</string>
-    		<string>spi</string>
+		<string>spi</string>
 	</array>
 	<key>com.apple.security.exception.mach-lookup.global-name</key>
 	<array>
-                <string>com.apple.commcenter.carrierspace.xpc</string>
+		<string>com.apple.commcenter.carrierspace.xpc</string>
 		<string>com.apple.basebandd.xpc</string>
+		<string>com.apple.private.corewifi.internal-xpc</string>
 	</array>
 </dict>
 </plist>
