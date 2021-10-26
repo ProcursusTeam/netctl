@@ -5,7 +5,7 @@
 
 #include "wifi.h"
 
-int info(WiFiDeviceClientRef client, bool current, int argc, char **argv) {
+int info(bool current, int argc, char **argv) {
 	WiFiNetworkRef network;
 	int ch;
 	bool bssid = false;
@@ -33,9 +33,9 @@ int info(WiFiDeviceClientRef client, bool current, int argc, char **argv) {
 	if (current)
 		network = WiFiDeviceClientCopyCurrentNetwork(client);
 	else if (bssid)
-		network = getNetworkWithBSSID(argv[0], client);
+		network = getNetworkWithBSSID(argv[0]);
 	else
-		network = getNetworkWithSSID(argv[0], client);
+		network = getNetworkWithSSID(argv[0]);
 
 	if (key != NULL) {
 		CFPropertyListRef property = WiFiNetworkGetProperty(

@@ -8,6 +8,7 @@
 
 CFArrayRef scanNetworks;
 WiFiManagerRef manager;
+WiFiDeviceClientRef client;
 
 int wifi(int argc, char *argv[]) {
 	if (!argv[2]) {
@@ -23,14 +24,14 @@ int wifi(int argc, char *argv[]) {
 	if (!devices) {
 		errx(1, "Failed to get devices");
 	}
-	WiFiDeviceClientRef client =
+	client =
 		(WiFiDeviceClientRef)CFArrayGetValueAtIndex(devices, 0);
 
 	// TODO: Make this not an ugly blob
 	if (!strcmp(argv[2], "current")) {
-		ret = info(client, true, argc - 2, argv + 2);
+		ret = info(true, argc - 2, argv + 2);
 	} else if (!strcmp(argv[2], "info")) {
-		ret = info(client, false, argc - 2, argv + 2);
+		ret = info(false, argc - 2, argv + 2);
 	} else if (!strcmp(argv[2], "list")) {
 		ret = list();
 	} else if (!strcmp(argv[2], "power")) {
@@ -42,18 +43,20 @@ int wifi(int argc, char *argv[]) {
 		else
 			errx(1, "invalid action");
 	} else if (!strcmp(argv[2], "scan"))
-		ret = scan(client);
+		ret = scan();
 	else if (!strcmp(argv[2], "connect"))
-		ret = connect(client, argc - 2, argv + 2);
+		ret = connect(argc - 2, argv + 2);
 	else if (!strcmp(argv[2], "disconnect"))
 		ret = WiFiDeviceClientDisassociate(client);
-	else
+	else if (!strcmp(argv[2], "forget")) {
+		ret = forget(argc - 2, argv + 2);
+	} else
 		errx(1, "invalid wifi subcommand");
 	CFRelease(manager);
 	return ret;
 }
 
-int list() {
+int list(void) {
 	CFArrayRef networks = WiFiManagerClientCopyNetworks(manager);
 
 	for (int i = 0; i < CFArrayGetCount(networks); i++) {
@@ -76,11 +79,9 @@ CFStringRef networkBSSIDRef(WiFiNetworkRef network) {
 }
 
 void getNetworkScanCallback(WiFiDeviceClientRef client, CFArrayRef results,
-						 CFErrorRef error, void *token) {
-	if ((NSError *)CFBridgingRelease(error))
-		errx(1, "Failed to scan: %s",
-			 [[(NSError *)CFBridgingRelease(error) localizedDescription]
-				 UTF8String]);
+						 int error, void *token) {
+	if (error != 0)
+		errx(1, "Failed to scan");
 
 	scanNetworks = CFArrayCreateCopy(kCFAllocatorDefault, results);
 
@@ -88,7 +89,7 @@ void getNetworkScanCallback(WiFiDeviceClientRef client, CFArrayRef results,
 	CFRunLoopStop(CFRunLoopGetCurrent());
 }
 
-WiFiNetworkRef getNetworkWithSSID(char *ssid, WiFiDeviceClientRef client) {
+WiFiNetworkRef getNetworkWithSSID(char *ssid) {
 	WiFiNetworkRef network;
 
 	CFArrayRef networks = WiFiManagerClientCopyNetworks(manager);
@@ -103,7 +104,7 @@ WiFiNetworkRef getNetworkWithSSID(char *ssid, WiFiDeviceClientRef client) {
 	WiFiManagerClientScheduleWithRunLoop(manager, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
 	WiFiDeviceClientScanAsync(
 		client, (__bridge CFDictionaryRef)[NSDictionary dictionary],
-		getNetworkScanCallback, 0);
+		(WiFiDeviceScanCallback)getNetworkScanCallback, 0);
 	CFRunLoopRun();
 
 	for (int i = 0; i < CFArrayGetCount(scanNetworks); i++) {
@@ -119,7 +120,7 @@ WiFiNetworkRef getNetworkWithSSID(char *ssid, WiFiDeviceClientRef client) {
 	return network;
 }
 
-WiFiNetworkRef getNetworkWithBSSID(char *bssid, WiFiDeviceClientRef client) {
+WiFiNetworkRef getNetworkWithBSSID(char *bssid) {
 	WiFiNetworkRef network;
 	CFArrayRef networks;
 
@@ -135,7 +136,7 @@ WiFiNetworkRef getNetworkWithBSSID(char *bssid, WiFiDeviceClientRef client) {
 	WiFiManagerClientScheduleWithRunLoop(manager, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
 	WiFiDeviceClientScanAsync(
 		client, (__bridge CFDictionaryRef)[NSDictionary dictionary],
-		getNetworkScanCallback, 0);
+		(WiFiDeviceScanCallback)getNetworkScanCallback, 0);
 	CFRunLoopRun();
 
 	for (int i = 0; i < CFArrayGetCount(scanNetworks); i++) {

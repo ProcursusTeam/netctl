@@ -7,6 +7,7 @@
 * [x] `netctl wifi list`
 * [x] `netctl wifi connect SSID`
 * [x] `netctl wifi disconnect SSID`
+* [x] `netctl wifi forget SSID`
 * [x] `netctl wifi scan`
 * [x] `netctl wifi power status/on/off/toggle`
 * [ ] `netctl cellular info`
