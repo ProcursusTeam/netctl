@@ -5,7 +5,7 @@
 * [x] `netctl wifi current`
 * [x] `netctl wifi current -k key`
 * [x] `netctl wifi list`
-* [x] `netctl wifi connect SSID` (known networks)
+* [x] `netctl wifi connect SSID`
 * [x] `netctl wifi disconnect SSID`
 * [x] `netctl wifi scan`
 * [x] `netctl wifi power status/on/off/toggle`

@@ -47,6 +47,7 @@ extern "C" {
 	int WiFiManagerClientGetMISDiscoveryState(WiFiManagerRef manager);
 
 	void WiFiManagerClientAddNetwork(WiFiManagerRef manager, WiFiNetworkRef network);
+	void WiFiManagerClientRemoveNetwork(WiFiManagerRef manager, WiFiNetworkRef network);
 
 #if __cplusplus
 }

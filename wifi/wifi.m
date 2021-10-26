@@ -6,7 +6,7 @@
 
 #include "wifi.h"
 
-CFArrayRef connectNetworks;
+CFArrayRef scanNetworks;
 WiFiManagerRef manager;
 
 int wifi(int argc, char *argv[]) {
@@ -75,38 +75,78 @@ CFStringRef networkBSSIDRef(WiFiNetworkRef network) {
 	return WiFiNetworkGetProperty(network, CFSTR("BSSID"));
 }
 
-WiFiNetworkRef getNetworkWithSSID(char *ssid) {
+void getNetworkScanCallback(WiFiDeviceClientRef client, CFArrayRef results,
+						 CFErrorRef error, void *token) {
+	if ((NSError *)CFBridgingRelease(error))
+		errx(1, "Failed to scan: %s",
+			 [[(NSError *)CFBridgingRelease(error) localizedDescription]
+				 UTF8String]);
+
+	scanNetworks = CFArrayCreateCopy(kCFAllocatorDefault, results);
+
+	WiFiManagerClientUnscheduleFromRunLoop(manager);
+	CFRunLoopStop(CFRunLoopGetCurrent());
+}
+
+WiFiNetworkRef getNetworkWithSSID(char *ssid, WiFiDeviceClientRef client) {
 	WiFiNetworkRef network;
+
 	CFArrayRef networks = WiFiManagerClientCopyNetworks(manager);
 
 	for (int i = 0; i < CFArrayGetCount(networks); i++) {
 		if (CFEqual(CFStringCreateWithCString(kCFAllocatorDefault, ssid, kCFStringEncodingUTF8),
 					WiFiNetworkGetSSID((WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)))) {
-			network = (WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i);
-			break;
+			return (WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i);
 		}
 	}
 
-	if (network == NULL)
-		errx(1, "Could not find network with specified SSID: %s", ssid);
+	WiFiManagerClientScheduleWithRunLoop(manager, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+	WiFiDeviceClientScanAsync(
+		client, (__bridge CFDictionaryRef)[NSDictionary dictionary],
+		getNetworkScanCallback, 0);
+	CFRunLoopRun();
 
+	for (int i = 0; i < CFArrayGetCount(scanNetworks); i++) {
+		if (CFEqual(CFStringCreateWithCString(kCFAllocatorDefault, ssid, kCFStringEncodingUTF8),
+					WiFiNetworkGetSSID((WiFiNetworkRef)CFArrayGetValueAtIndex(scanNetworks, i)))) {
+			return (WiFiNetworkRef)CFArrayGetValueAtIndex(scanNetworks, i);
+		}
+	}
+
+	errx(1, "Could not find network with specified SSID: %s", ssid);
+
+	/* NOT REACHED */
 	return network;
 }
 
-WiFiNetworkRef getNetworkWithBSSID(char *ssid) {
+WiFiNetworkRef getNetworkWithBSSID(char *bssid, WiFiDeviceClientRef client) {
 	WiFiNetworkRef network;
-	CFArrayRef networks = WiFiManagerClientCopyNetworks(manager);
+	CFArrayRef networks;
+
+	networks = WiFiManagerClientCopyNetworks(manager);
 
 	for (int i = 0; i < CFArrayGetCount(networks); i++) {
-		if (CFEqual(CFStringCreateWithCString(kCFAllocatorDefault, ssid, kCFStringEncodingUTF8),
+		if (CFEqual(CFStringCreateWithCString(kCFAllocatorDefault, bssid, kCFStringEncodingUTF8),
 					networkBSSIDRef((WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)))) {
-			network = (WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i);
-			break;
+			return (WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i);
 		}
 	}
 
-	if (network == NULL)
-		errx(1, "Could not find network with specified SSID: %s", ssid);
+	WiFiManagerClientScheduleWithRunLoop(manager, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+	WiFiDeviceClientScanAsync(
+		client, (__bridge CFDictionaryRef)[NSDictionary dictionary],
+		getNetworkScanCallback, 0);
+	CFRunLoopRun();
 
-	return network;
+	for (int i = 0; i < CFArrayGetCount(scanNetworks); i++) {
+		if (CFEqual(CFStringCreateWithCString(kCFAllocatorDefault, bssid, kCFStringEncodingUTF8),
+					networkBSSIDRef((WiFiNetworkRef)CFArrayGetValueAtIndex(scanNetworks, i)))) {
+			return (WiFiNetworkRef)CFArrayGetValueAtIndex(scanNetworks, i);
+		}
+	}
+
+	errx(1, "Could not find network with specified BSSID: %s", bssid);
+
+	/* NOT REACHED */
+	return 0;
 }

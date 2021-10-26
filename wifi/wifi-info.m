@@ -33,9 +33,9 @@ int info(WiFiDeviceClientRef client, bool current, int argc, char **argv) {
 	if (current)
 		network = WiFiDeviceClientCopyCurrentNetwork(client);
 	else if (bssid)
-		network = getNetworkWithBSSID(argv[0]);
+		network = getNetworkWithBSSID(argv[0], client);
 	else
-		network = getNetworkWithSSID(argv[0]);
+		network = getNetworkWithSSID(argv[0], client);
 
 	if (key != NULL) {
 		CFPropertyListRef property = WiFiNetworkGetProperty(

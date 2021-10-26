@@ -31,7 +31,7 @@ void scanCallback(WiFiDeviceClientRef client, CFArrayRef results,
 			SSID = @"<hidden>";
 		}
 
-		printf("%s: %s\n",
+		printf("%s : %s\n",
 			[SSID UTF8String],
 			networkBSSID((WiFiNetworkRef)CFArrayGetValueAtIndex(results, i)));
 	}
