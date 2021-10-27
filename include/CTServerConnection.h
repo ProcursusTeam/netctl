@@ -60,6 +60,13 @@ extern "C" {
     	extern NSString* kCTCellMonitorPID;
     	extern NSString* kCTCellMonitorTAC;
     	extern NSString* kCTCellMonitorUARFCN;
+	extern NSString* kCTMobileEquipmentInfoMobileId;
+	extern NSString* kCTMobileEquipmentInfoSubscriberId;
+	extern NSString* kCTMobileEquipmentInfoICCID;
+	extern NSString* kCTMobileEquipmentInfoIMEI;
+	extern NSString* kCTMobileEquipmentInfoIMSI;
+	extern NSString* kCTMobileEquipmentInfoMEID;
+	extern NSString* kCTMobileEquipmentInfoSlotId;
 	
 	typedef struct __CellInfo CellInfo;
 	
@@ -87,6 +94,7 @@ extern "C" {
 	void _CTServerConnectionCellMonitorCopyCellInfo(CTServerConnectionRef ref, int* success, CFArrayRef* cells);
 	void _CTServerConnectionEnableRegistration(CTServerConnectionRef ref);
 	void _CTServerConnectionDisableRegistration(CTServerConnectionRef ref);
+	void _CTServerConnectionCopyMobileEquipmentInfo(CTServerConnectionRef ref, CFDictionaryRef* dict);
 
 #if __cplusplus
 }
