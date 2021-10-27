@@ -61,7 +61,6 @@ static int cells(void) {
 		return 1;
 	}
 
-	int ctr = 1;
 	for (NSDictionary* cell in (__bridge NSArray*)cells) {
 		int bandinfo = [cell[kCTCellMonitorBandInfo] intValue];
 		int bandwidth = [cell[kCTCellMonitorBandwidth] intValue];
@@ -85,8 +84,7 @@ static int cells(void) {
 			      "\tPID: %d\n"
 			      "\tTAC: %d\n"
 			   "\tUARFCN: %d\n",
-			   ctr, bandinfo, bandwidth, cellID, [cellTechnology UTF8String], [cellType UTF8String], mcc, mnc, pid, tac, uarfcn);
-		ctr++;
+			   bandinfo, bandwidth, cellID, [cellTechnology UTF8String], [cellType UTF8String], mcc, mnc, pid, tac, uarfcn);
 	}
 
 	CFRelease(cells);
