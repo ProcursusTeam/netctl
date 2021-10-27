@@ -50,6 +50,8 @@ extern "C" {
 
 	extern NSString* kCTIndicatorRadioTransmitNotification;
 	extern NSString* kCTRadioTransmitDCHStatus;
+
+	// CopyCellInfo()
 	extern NSString* kCTCellMonitorBandInfo;
     	extern NSString* kCTCellMonitorBandwidth;
     	extern NSString* kCTCellMonitorCellId;
@@ -60,8 +62,10 @@ extern "C" {
     	extern NSString* kCTCellMonitorPID;
     	extern NSString* kCTCellMonitorTAC;
     	extern NSString* kCTCellMonitorUARFCN;
-	extern NSString* kCTMobileEquipmentInfoMobileId;
-	extern NSString* kCTMobileEquipmentInfoSubscriberId;
+
+	// MobileEquipmentInfo()
+	extern NSString* kCTMobileEquipmentInfoCurrentMobileId;
+	extern NSString* kCTMobileEquipmentInfoCurrentSubscriberId;
 	extern NSString* kCTMobileEquipmentInfoICCID;
 	extern NSString* kCTMobileEquipmentInfoIMEI;
 	extern NSString* kCTMobileEquipmentInfoIMSI;
