@@ -39,6 +39,7 @@ static int info(void) {
 	printf("Connection Strength: %ld%%\n", bars * 25);
 	printf("In Home Country: %s\n", inHomeCountry ? "Yes" : "No");
 	printf("Registration status: %s\n", [(__bridge NSString*)registrationStatus UTF8String]);
+	printf("\nMobile ID: %lld\nSubscriber ID: %lld\nICCID: %lld\nIMEI: %lld\nIMSI: %lld\nMEID: %lld\nSlot ID: %lld\n", mobileId, subscriberId, ICCID, IMEI, IMSI, MEID, SlotId);
 	printf("\n");
 
 	int i = 0;
