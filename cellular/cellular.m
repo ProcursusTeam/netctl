@@ -15,11 +15,22 @@ static int info(void) {
 	CTTelephonyNetworkInfo* info = [[CTTelephonyNetworkInfo alloc] init];
 	NSDictionary<NSString*, CTCarrier*>* serviceTech = info.serviceSubscriberCellularProviders;
 	NSDictionary<NSString*, NSString*>* accessTechnology = info.serviceCurrentRadioAccessTechnology;
-
+	CFDictionaryRef mobileEquipmentInfoCF;
+	_CTServerConnectionCopyMobileEquipmentInfo(serverConnection, &mobileEquipmentInfoCF);
+	NSDictionary* mobileEquipmentInfo = (__bridge_transfer NSDictionary*)mobileEquipmentInfoCF;
 
 	long int raw = 0, graded = 0, bars = 0;
 	bool inHomeCountry = false;
 	CFStringRef registrationStatus = nil;
+	int64_t mobileId, subscriberId, ICCID, IMEI, IMSI, MEID, SlotId;
+
+	mobileId = [mobileEquipmentInfo[kCTMobileEquipmentInfoCurrentMobileId] longLongValue];
+	subscriberId = [mobileEquipmentInfo[kCTMobileEquipmentInfoCurrentSubscriberId] longLongValue];
+	ICCID = [mobileEquipmentInfo[kCTMobileEquipmentInfoICCID] longLongValue];
+	IMEI = [mobileEquipmentInfo[kCTMobileEquipmentInfoIMEI] longLongValue];
+	IMSI = [mobileEquipmentInfo[kCTMobileEquipmentInfoIMSI] longLongValue];
+	MEID = [mobileEquipmentInfo[kCTMobileEquipmentInfoMEID] longLongValue];
+	SlotId = [mobileEquipmentInfo[kCTMobileEquipmentInfoSlotId] longLongValue];
 
 	CTIndicatorsGetSignalStrength(&raw, &graded, &bars);
 	_CTServerConnectionIsInHomeCountry(serverConnection, &inHomeCountry);
