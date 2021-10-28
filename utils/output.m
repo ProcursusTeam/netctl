@@ -15,6 +15,11 @@
 
 	for (id object in array) {
 		if ([object isKindOfClass:[NSDictionary class]]) {
+			if ([[object allKeys] count] > 1) {
+				fprintf(stderr, "dictionary should only contain one key and one value");
+				return nil;
+			}
+
 			id key = [object allKeys][0];
 			if ([object[key] isKindOfClass:[NSArray class]]) {
 				NSDictionary* newDictionary = @{ 
@@ -79,6 +84,11 @@
 		}
 
 		else if ([object isKindOfClass:[NSDictionary class]]) {
+			if ([[object allKeys] count] > 1) {
+				fprintf(stderr, "dictionary should only contain one key and one value");
+				return;
+			}
+
 			NSArray* allKeys = [object allKeys];
 			id value = object[allKeys[0]];
 
