@@ -8,7 +8,7 @@
 static CTServerConnectionRef serverConnection;
 
 static int number(void) {
-	printf("%s\n", [(NSString*)CFBridgingRelease(CTSettingCopyMyPhoneNumber()) UTF8String]);
+	printf("%s\n", [(__bridge_transfer NSString*)CTSettingCopyMyPhoneNumber() UTF8String]);
 	return 0;
 }
 
@@ -74,7 +74,7 @@ static int info(void) {
 
 static int call(NSString* number) {
 	CTCallRef call = CTCallDial(number);
-	printf("Calling %s...\n", [(NSString*)CFBridgingRelease(CTCallCopyAddress(nil, call)) UTF8String]);
+	printf("Calling %s...\n", [(__bridge_transfer NSString*)CTCallCopyAddress(nil, call) UTF8String]);
 	return 0;
 }
 
