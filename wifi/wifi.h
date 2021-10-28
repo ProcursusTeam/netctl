@@ -1,11 +1,11 @@
 #import <MobileWiFi/MobileWiFi.h>
 
-int list(void);
-int info(bool, int, char **);
-int power(char *);
-int scan(void);
-int connect(int, char **);
-int forget(int, char **);
+int wifilist(void);
+int wifiinfo(bool, int, char **);
+int wifipower(char *);
+int wifiscan(void);
+int wificonnect(int, char **);
+int wififorget(int, char **);
 WiFiNetworkRef getNetworkWithSSID(char *ssid);
 WiFiNetworkRef getNetworkWithBSSID(char *bssid);
 

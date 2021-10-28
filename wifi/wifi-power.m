@@ -5,7 +5,7 @@
 
 #include "wifi.h"
 
-int power(char *action) {
+int wifipower(char *action) {
 	bool status = CFBooleanGetValue(
 		WiFiManagerClientCopyProperty(manager, CFSTR("AllowEnable")));
 

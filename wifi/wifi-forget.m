@@ -5,7 +5,7 @@
 
 #include "wifi.h"
 
-int forget(int argc, char **argv) {
+int wififorget(int argc, char **argv) {
 	WiFiNetworkRef network;
 	bool bssid = false;
 	int ch;

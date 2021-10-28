@@ -5,20 +5,20 @@
 
 #include "wifi.h"
 
-void scanCallback(WiFiDeviceClientRef, CFArrayRef, int, void *);
+void wifiScanCallback(WiFiDeviceClientRef, CFArrayRef, int, void *);
 
-int scan(void) {
+int wifiscan(void) {
 	WiFiManagerClientScheduleWithRunLoop(manager, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
 
 	WiFiDeviceClientScanAsync(
 		client, (__bridge CFDictionaryRef)[NSDictionary dictionary],
-		(WiFiDeviceScanCallback)scanCallback, 0);
+		(WiFiDeviceScanCallback)wifiScanCallback, 0);
 	CFRunLoopRun();
 
 	return 0;
 }
 
-void scanCallback(WiFiDeviceClientRef client, CFArrayRef results,
+void wifiScanCallback(WiFiDeviceClientRef client, CFArrayRef results,
 				  int error, void *token) {
 	if (error != 0)
 		errx(1, "Failed to scan");

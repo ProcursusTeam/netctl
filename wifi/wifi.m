@@ -29,34 +29,34 @@ int wifi(int argc, char *argv[]) {
 
 	// TODO: Make this not an ugly blob
 	if (!strcmp(argv[2], "current")) {
-		ret = info(true, argc - 2, argv + 2);
+		ret = wifiinfo(true, argc - 2, argv + 2);
 	} else if (!strcmp(argv[2], "info")) {
-		ret = info(false, argc - 2, argv + 2);
+		ret = wifiinfo(false, argc - 2, argv + 2);
 	} else if (!strcmp(argv[2], "list")) {
-		ret = list();
+		ret = wifilist();
 	} else if (!strcmp(argv[2], "power")) {
 		if (argc != 4)
-			ret = power(NULL);
+			ret = wifipower(NULL);
 		else if (!strcmp(argv[3], "on") || !strcmp(argv[3], "off") ||
 				 !strcmp(argv[3], "toggle") || !strcmp(argv[3], "status"))
-			ret = power(argv[3]);
+			ret = wifipower(argv[3]);
 		else
 			errx(1, "invalid action");
 	} else if (!strcmp(argv[2], "scan"))
-		ret = scan();
+		ret = wifiscan();
 	else if (!strcmp(argv[2], "connect"))
-		ret = connect(argc - 2, argv + 2);
+		ret = wificonnect(argc - 2, argv + 2);
 	else if (!strcmp(argv[2], "disconnect"))
 		ret = WiFiDeviceClientDisassociate(client);
 	else if (!strcmp(argv[2], "forget")) {
-		ret = forget(argc - 2, argv + 2);
+		ret = wififorget(argc - 2, argv + 2);
 	} else
 		errx(1, "invalid wifi subcommand");
 	CFRelease(manager);
 	return ret;
 }
 
-int list(void) {
+int wifilist(void) {
 	CFArrayRef networks = WiFiManagerClientCopyNetworks(manager);
 
 	for (int i = 0; i < CFArrayGetCount(networks); i++) {

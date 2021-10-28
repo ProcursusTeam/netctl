@@ -5,11 +5,10 @@
 
 #include "wifi.h"
 
-void connectScanCallback(WiFiDeviceClientRef, CFArrayRef, CFErrorRef, void *);
-void connectCallback(WiFiDeviceClientRef, WiFiNetworkRef, CFDictionaryRef, int,
+void wifiConnectCallback(WiFiDeviceClientRef, WiFiNetworkRef, CFDictionaryRef, int,
 					 const void *);
 
-int connect(int argc, char **argv) {
+int wificonnect(int argc, char **argv) {
 	int ch;
 	char *password = NULL;
 	bool bssid = false;
@@ -45,13 +44,13 @@ int connect(int argc, char **argv) {
 		WiFiNetworkSetPassword(network, (__bridge CFStringRef)[NSString stringWithUTF8String:password]);
 
 	WiFiManagerClientScheduleWithRunLoop(manager, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
-	WiFiDeviceClientAssociateAsync(client, network, connectCallback, NULL);
+	WiFiDeviceClientAssociateAsync(client, network, wifiConnectCallback, NULL);
 	CFRunLoopRun();
 
 	return 0;
 }
 
-void connectCallback(WiFiDeviceClientRef device, WiFiNetworkRef network,
+void wifiConnectCallback(WiFiDeviceClientRef device, WiFiNetworkRef network,
 					 CFDictionaryRef dict, int error, const void *object) {
 	WiFiManagerClientUnscheduleFromRunLoop(manager);
 	CFRunLoopStop(CFRunLoopGetCurrent());

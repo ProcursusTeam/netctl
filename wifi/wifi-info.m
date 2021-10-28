@@ -5,7 +5,7 @@
 
 #include "wifi.h"
 
-int info(bool current, int argc, char **argv) {
+int wifiinfo(bool current, int argc, char **argv) {
 	WiFiNetworkRef network;
 	int ch;
 	bool bssid = false;
