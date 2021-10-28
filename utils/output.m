@@ -57,7 +57,7 @@
 	if (useJSON) {
 		NSArray* jsonArray = [self jsonifiedArrayFromArray:array];
 		NSData* jsonData = [NSJSONSerialization dataWithJSONObject:jsonArray options:NSJSONWritingPrettyPrinted error:nil];
-		printf("%s\n", jsonData.bytes);
+		printf("%s\n", (const char*)jsonData.bytes);
 	}
 
 	else {
