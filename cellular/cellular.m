@@ -3,6 +3,7 @@
 #include <CoreTelephony/CTTelephonyNetworkInfo.h>
 #include <Foundation/Foundation.h>
 #include <err.h>
+#include <output.h>
 
 static CTServerConnectionRef serverConnection;
 
@@ -22,38 +23,51 @@ static int info(void) {
 	long int raw = 0, graded = 0, bars = 0;
 	bool inHomeCountry = false;
 	CFStringRef registrationStatus = nil;
-	int64_t mobileId, subscriberId, ICCID, IMEI, IMSI, MEID, SlotId;
+	NSNumber *mobileId, *subscriberId, *ICCID, *IMEI, *IMSI, *MEID, *SlotId;
 
-	mobileId = [mobileEquipmentInfo[kCTMobileEquipmentInfoCurrentMobileId] longLongValue];
-	subscriberId = [mobileEquipmentInfo[kCTMobileEquipmentInfoCurrentSubscriberId] longLongValue];
-	ICCID = [mobileEquipmentInfo[kCTMobileEquipmentInfoICCID] longLongValue];
-	IMEI = [mobileEquipmentInfo[kCTMobileEquipmentInfoIMEI] longLongValue];
-	IMSI = [mobileEquipmentInfo[kCTMobileEquipmentInfoIMSI] longLongValue];
-	MEID = [mobileEquipmentInfo[kCTMobileEquipmentInfoMEID] longLongValue];
-	SlotId = [mobileEquipmentInfo[kCTMobileEquipmentInfoSlotId] longLongValue];
+	mobileId = mobileEquipmentInfo[kCTMobileEquipmentInfoCurrentMobileId];
+	subscriberId = mobileEquipmentInfo[kCTMobileEquipmentInfoCurrentSubscriberId];
+	ICCID = mobileEquipmentInfo[kCTMobileEquipmentInfoICCID];
+	IMEI = mobileEquipmentInfo[kCTMobileEquipmentInfoIMEI];
+	IMSI = mobileEquipmentInfo[kCTMobileEquipmentInfoIMSI];
+	MEID = mobileEquipmentInfo[kCTMobileEquipmentInfoMEID];
+	SlotId = mobileEquipmentInfo[kCTMobileEquipmentInfoSlotId];
 
 	CTIndicatorsGetSignalStrength(&raw, &graded, &bars);
 	_CTServerConnectionIsInHomeCountry(serverConnection, &inHomeCountry);
 	_CTServerConnectionGetRegistrationStatus(serverConnection, &registrationStatus);
 
-	printf("Connection Strength: %ld%%\n", bars * 25);
-	printf("In Home Country: %s\n", inHomeCountry ? "Yes" : "No");
-	printf("Registration status: %s\n", [(__bridge NSString*)registrationStatus UTF8String]);
-	printf("\nMobile ID: %lld\nSubscriber ID: %lld\nICCID: %lld\nIMEI: %lld\nIMSI: %lld\nMEID: %lld\nSlot ID: %lld\n", mobileId, subscriberId, ICCID, IMEI, IMSI, MEID, SlotId);
-	printf("\n");
+	NSMutableArray* array = [NSMutableArray array];
+
+	[array addObjectsFromArray:@[
+		@{ @"Connection Strength" : @(bars * 25)},
+		@{ @"In Home Country" : inHomeCountry ? @"Yes" : @"No"},
+		@{ @"Registration Status" : (__bridge NSString*)registrationStatus},
+			  @{ @"Mobile ID" : mobileId},
+			  @{ @"Subscriber ID" : subscriberId},
+				  @{ @"ICCID" : ICCID},
+				   @{ @"IMEI" : IMEI},
+				   @{ @"IMSI" : IMSI},
+				   @{ @"MEID" : MEID},
+				@{ @"Slot ID" : SlotId}
+	]];
+
+	[array addObject:[NCNewline new]];
 
 	int i = 0;
 	for (NSString* key in serviceTech) {
-		printf("SIM %d:\n", i);
-		printf("\tCarrier Name: %s\n", serviceTech[key].carrierName.UTF8String);
-		printf("\tAllows VOIP (Voice over IP): %s\n", serviceTech[key].allowsVOIP ? "Yes" : "No");
-		printf("\tISO Country Code: %s\n", serviceTech[key].isoCountryCode.UTF8String);
-		printf("\tMobile Country Code (MCC): %s\n", serviceTech[key].mobileCountryCode.UTF8String);
-		printf("\tMobile Network Code (MCC): %s\n", serviceTech[key].mobileNetworkCode.UTF8String);
-		printf("\n");
+		NSString* simString = [NSString stringWithFormat: @"SIM %d", i];
+		[array addObject: @{ simString : @[
+	     @{ @"Carrier Name" : serviceTech[key].carrierName ?: [NSNull null]},
+	 @{ @"Allows VOIP (Voice over IP)" : serviceTech[key].allowsVOIP ? @"Yes" : @"No" },
+		    @{ @"ISO Country Code" : serviceTech[key].isoCountryCode ?: [NSNull null]},
+	   @{ @"Mobile Country Code (MCC)" : serviceTech[key].mobileCountryCode ?: [NSNull null]},
+	   @{ @"Mobile Network Code (MNC)" : serviceTech[key].mobileNetworkCode ?: [NSNull null]}
+		]}];
 		i++;
 	}
 
+	[NCOutput printArray:array withJSON:NO];
 	CFRelease(registrationStatus);
 	return 0;
 }
@@ -74,29 +88,31 @@ static int cells(void) {
 	}
 
 	for (NSDictionary* cell in (__bridge NSArray*)cells) {
-		int bandinfo = [cell[kCTCellMonitorBandInfo] intValue];
-		int bandwidth = [cell[kCTCellMonitorBandwidth] intValue];
-		int cellID = [cell[kCTCellMonitorCellId] intValue];
+		NSNumber* bandinfo = cell[kCTCellMonitorBandInfo];
+		NSNumber* bandwidth = cell[kCTCellMonitorBandwidth];
+		NSNumber* cellID = cell[kCTCellMonitorCellId];
 		NSString* cellTechnology = [cell[kCTCellMonitorCellRadioAccessTechnology] componentsSeparatedByString:@"kCTCellMonitorRadioAccessTechnology"][1];
 		NSString* cellType = cell[kCTCellMonitorCellType];
-		int mcc = [cell[kCTCellMonitorMCC] intValue];
-		int mnc = [cell[kCTCellMonitorMNC] intValue];
-		int pid = [cell[kCTCellMonitorPID] intValue];
-		int tac = [cell[kCTCellMonitorTAC] intValue];
-		int uarfcn = [cell[kCTCellMonitorUARFCN] intValue];
+		NSNumber* mcc = cell[kCTCellMonitorMCC];
+		NSNumber* mnc = cell[kCTCellMonitorMNC];
+		NSNumber* pid = cell[kCTCellMonitorPID];
+		NSNumber* tac = cell[kCTCellMonitorTAC];
+		NSNumber* uarfcn = cell[kCTCellMonitorUARFCN];
 
-		printf( "Current Cell:\n"
-			"\tBandinfo: %d\n"
-			"\tBandwidth: %d\n"
-			  "\tCell ID: %d\n"
-		  "\tCell Technology: %s\n"
-			"\tCell Type: %s\n"
-			      "\tMCC: %d\n"
-			      "\tMNC: %d\n"
-			      "\tPID: %d\n"
-			      "\tTAC: %d\n"
-			   "\tUARFCN: %d\n",
-			   bandinfo, bandwidth, cellID, [cellTechnology UTF8String], [cellType UTF8String], mcc, mnc, pid, tac, uarfcn);
+		[NCOutput printArray:@[
+		 @{ @"Current Cell" : @[
+			 @{ @"Bandinfo" : bandinfo },
+			@{ @"Bandwidth" : bandwidth},
+			  @{ @"Cell ID" : cellID },
+		  @{ @"Cell Technology" : cellTechnology },
+			@{ @"Cell Type" : cellType },
+			      @{ @"MCC" : mcc },
+			      @{ @"MNC" : mnc },
+			      @{ @"PID" : pid },
+			      @{ @"TAC" : tac },
+			   @{ @"UARFCN" : uarfcn },
+			     ]}] withJSON:YES];
+
 	}
 
 	CFRelease(cells);
