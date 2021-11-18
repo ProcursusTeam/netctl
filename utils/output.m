@@ -22,7 +22,7 @@
 
 			id key = [object allKeys][0];
 			if ([object[key] isKindOfClass:[NSArray class]]) {
-				NSDictionary* newDictionary = @{ 
+				NSDictionary* newDictionary = @{
 					key : [self jsonifiedArrayFromArray:object[key]]
 				};
 
@@ -68,7 +68,7 @@
 +(void)printArray:(NSArray*)array level:(int)level {
   	for (id object in array) {
 		for (int i = 0; i < level; i++) {
-			putc('\t', stdout); 
+			putc('\t', stdout);
 		}
 
 		if ([object isKindOfClass:[NSString class]]) {
