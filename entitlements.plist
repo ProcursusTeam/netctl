@@ -28,5 +28,9 @@
 	<array>
 		<string>apple</string>
 	</array>
+	<key>com.apple.keystore.access-keychain-keys</key>
+	<true/>
+	<key>com.apple.private.airdrop.discovery</key>
+	<true/>
 </dict>
 </plist>

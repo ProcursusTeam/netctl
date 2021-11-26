@@ -3,6 +3,7 @@
 
 int wifi(int, char **);
 int cellular(int, char **);
+int airdrop(int, char **);
 
 int main(int argc, char *argv[]) {
 	if (argc < 2)
@@ -12,6 +13,8 @@ int main(int argc, char *argv[]) {
 		return wifi(argc, argv);
 	else if (!strcmp(argv[1], "cellular"))
 		return cellular(argc, argv);
+	else if (!strcmp(argv[1], "airdrop"))
+		return airdrop(argc, argv);
 
 	errx(1, "invalid subcommand");
 }
