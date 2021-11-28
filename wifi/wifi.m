@@ -1,10 +1,10 @@
+#include "wifi.h"
+
 #import <Foundation/Foundation.h>
 #import <MobileWiFi/MobileWiFi.h>
 #include <err.h>
 #include <stdbool.h>
 #include <stdio.h>
-
-#include "wifi.h"
 
 CFArrayRef scanNetworks;
 WiFiManagerRef manager;
@@ -24,8 +24,7 @@ int wifi(int argc, char *argv[]) {
 	if (!devices) {
 		errx(1, "Failed to get devices");
 	}
-	client =
-		(WiFiDeviceClientRef)CFArrayGetValueAtIndex(devices, 0);
+	client = (WiFiDeviceClientRef)CFArrayGetValueAtIndex(devices, 0);
 
 	// TODO: Make this not an ugly blob
 	if (!strcmp(argv[2], "current")) {
@@ -60,10 +59,10 @@ int wifilist(void) {
 	CFArrayRef networks = WiFiManagerClientCopyNetworks(manager);
 
 	for (int i = 0; i < CFArrayGetCount(networks); i++) {
-		printf("%s : %s\n",
-			[(NSString *)CFBridgingRelease(WiFiNetworkGetSSID(
-				(WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)))
-				UTF8String],
+		printf(
+			"%s : %s\n",
+			[(__bridge_transfer NSString *)WiFiNetworkGetSSID((
+				WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)) UTF8String],
 			networkBSSID((WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)));
 	}
 
@@ -71,7 +70,7 @@ int wifilist(void) {
 }
 
 const char *networkBSSID(WiFiNetworkRef network) {
-	return [(NSString *)CFBridgingRelease(networkBSSIDRef(network)) UTF8String];
+	return [(__bridge_transfer NSString *)networkBSSIDRef(network) UTF8String];
 }
 
 CFStringRef networkBSSIDRef(WiFiNetworkRef network) {
@@ -79,9 +78,8 @@ CFStringRef networkBSSIDRef(WiFiNetworkRef network) {
 }
 
 void getNetworkScanCallback(WiFiDeviceClientRef client, CFArrayRef results,
-						 int error, void *token) {
-	if (error != 0)
-		errx(1, "Failed to scan");
+							int error, void *token) {
+	if (error != 0) errx(1, "Failed to scan");
 
 	scanNetworks = CFArrayCreateCopy(kCFAllocatorDefault, results);
 
@@ -95,21 +93,26 @@ WiFiNetworkRef getNetworkWithSSID(char *ssid) {
 	CFArrayRef networks = WiFiManagerClientCopyNetworks(manager);
 
 	for (int i = 0; i < CFArrayGetCount(networks); i++) {
-		if (CFEqual(CFStringCreateWithCString(kCFAllocatorDefault, ssid, kCFStringEncodingUTF8),
-					WiFiNetworkGetSSID((WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)))) {
+		if (CFEqual(CFStringCreateWithCString(kCFAllocatorDefault, ssid,
+											  kCFStringEncodingUTF8),
+					WiFiNetworkGetSSID(
+						(WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)))) {
 			return (WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i);
 		}
 	}
 
-	WiFiManagerClientScheduleWithRunLoop(manager, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+	WiFiManagerClientScheduleWithRunLoop(manager, CFRunLoopGetCurrent(),
+										 kCFRunLoopDefaultMode);
 	WiFiDeviceClientScanAsync(
 		client, (__bridge CFDictionaryRef)[NSDictionary dictionary],
 		(WiFiDeviceScanCallback)getNetworkScanCallback, 0);
 	CFRunLoopRun();
 
 	for (int i = 0; i < CFArrayGetCount(scanNetworks); i++) {
-		if (CFEqual(CFStringCreateWithCString(kCFAllocatorDefault, ssid, kCFStringEncodingUTF8),
-					WiFiNetworkGetSSID((WiFiNetworkRef)CFArrayGetValueAtIndex(scanNetworks, i)))) {
+		if (CFEqual(CFStringCreateWithCString(kCFAllocatorDefault, ssid,
+											  kCFStringEncodingUTF8),
+					WiFiNetworkGetSSID((WiFiNetworkRef)CFArrayGetValueAtIndex(
+						scanNetworks, i)))) {
 			return (WiFiNetworkRef)CFArrayGetValueAtIndex(scanNetworks, i);
 		}
 	}
@@ -127,21 +130,26 @@ WiFiNetworkRef getNetworkWithBSSID(char *bssid) {
 	networks = WiFiManagerClientCopyNetworks(manager);
 
 	for (int i = 0; i < CFArrayGetCount(networks); i++) {
-		if (CFEqual(CFStringCreateWithCString(kCFAllocatorDefault, bssid, kCFStringEncodingUTF8),
-					networkBSSIDRef((WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)))) {
+		if (CFEqual(CFStringCreateWithCString(kCFAllocatorDefault, bssid,
+											  kCFStringEncodingUTF8),
+					networkBSSIDRef(
+						(WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)))) {
 			return (WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i);
 		}
 	}
 
-	WiFiManagerClientScheduleWithRunLoop(manager, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+	WiFiManagerClientScheduleWithRunLoop(manager, CFRunLoopGetCurrent(),
+										 kCFRunLoopDefaultMode);
 	WiFiDeviceClientScanAsync(
 		client, (__bridge CFDictionaryRef)[NSDictionary dictionary],
 		(WiFiDeviceScanCallback)getNetworkScanCallback, 0);
 	CFRunLoopRun();
 
 	for (int i = 0; i < CFArrayGetCount(scanNetworks); i++) {
-		if (CFEqual(CFStringCreateWithCString(kCFAllocatorDefault, bssid, kCFStringEncodingUTF8),
-					networkBSSIDRef((WiFiNetworkRef)CFArrayGetValueAtIndex(scanNetworks, i)))) {
+		if (CFEqual(CFStringCreateWithCString(kCFAllocatorDefault, bssid,
+											  kCFStringEncodingUTF8),
+					networkBSSIDRef((WiFiNetworkRef)CFArrayGetValueAtIndex(
+						scanNetworks, i)))) {
 			return (WiFiNetworkRef)CFArrayGetValueAtIndex(scanNetworks, i);
 		}
 	}

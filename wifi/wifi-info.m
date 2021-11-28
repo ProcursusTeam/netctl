@@ -27,8 +27,7 @@ int wifiinfo(bool current, int argc, char **argv) {
 	argc -= optind;
 	argv += optind;
 
-	if (!current && argv[0] == NULL)
-		errx(1, "no SSID or BSSID specified");
+	if (!current && argv[0] == NULL) errx(1, "no SSID or BSSID specified");
 
 	if (current)
 		network = WiFiDeviceClientCopyCurrentNetwork(client);
@@ -45,26 +44,30 @@ int wifiinfo(bool current, int argc, char **argv) {
 		CFTypeID type = CFGetTypeID(property);
 
 		if (type == CFStringGetTypeID()) {
-			printf("%s: %s\n", key,
-				[(NSString *)CFBridgingRelease(WiFiNetworkGetProperty(
+			printf(
+				"%s: %s\n", key,
+				[(__bridge_transfer NSString *)WiFiNetworkGetProperty(
 					network,
-					(__bridge CFStringRef)[NSString stringWithUTF8String:key]))
+					(__bridge CFStringRef)[NSString stringWithUTF8String:key])
 					UTF8String]);
 		} else if (type == CFNumberGetTypeID()) {
-			printf("%s: %i\n", key,
-				[(NSNumber *)CFBridgingRelease(WiFiNetworkGetProperty(
+			printf(
+				"%s: %i\n", key,
+				[(__bridge_transfer NSNumber *)WiFiNetworkGetProperty(
 					network,
-					(__bridge CFStringRef)[NSString stringWithUTF8String:key]))
+					(__bridge CFStringRef)[NSString stringWithUTF8String:key])
 					intValue]);
 		} else if (type == CFDateGetTypeID()) {
-			printf("%s: %s\n", key,
-				[(NSDate *)CFBridgingRelease(WiFiNetworkGetProperty(
+			printf(
+				"%s: %s\n", key,
+				[(__bridge_transfer NSDate *)WiFiNetworkGetProperty(
 					 network,
-					 (__bridge CFStringRef)[NSString stringWithUTF8String:key]))
+					 (__bridge CFStringRef)[NSString stringWithUTF8String:key])
 					description]
 					.UTF8String);
 		} else if (type == CFBooleanGetTypeID()) {
-			printf("%s: %s\n", key,
+			printf(
+				"%s: %s\n", key,
 				CFBooleanGetValue(WiFiNetworkGetProperty(
 					network,
 					(__bridge CFStringRef)[NSString stringWithUTF8String:key]))
@@ -75,8 +78,9 @@ int wifiinfo(bool current, int argc, char **argv) {
 		return 0;
 	}
 
-	printf("SSID: %s\n", [(NSString *)CFBridgingRelease(
-							 WiFiNetworkGetSSID(network)) UTF8String]);
+	printf(
+		"SSID: %s\n",
+		[(__bridge_transfer NSString *)WiFiNetworkGetSSID(network) UTF8String]);
 	printf("BSSID: %s\n", networkBSSID(network));
 	printf("WEP: %s\n", WiFiNetworkIsWEP(network) ? "yes" : "no");
 	printf("WPA: %s\n", WiFiNetworkIsWPA(network) ? "yes" : "no");
@@ -90,10 +94,10 @@ int wifiinfo(bool current, int argc, char **argv) {
 	printf("Username Required: %s\n",
 		   WiFiNetworkRequiresUsername(network) ? "yes" : "no");
 
-	CFDictionaryRef data = (CFDictionaryRef)WiFiDeviceClientCopyProperty(
-		client, CFSTR("RSSI"));
-	CFNumberRef scaled = (CFNumberRef)WiFiDeviceClientCopyProperty(
-		client, kWiFiScaledRSSIKey);
+	CFDictionaryRef data =
+		(CFDictionaryRef)WiFiDeviceClientCopyProperty(client, CFSTR("RSSI"));
+	CFNumberRef scaled =
+		(CFNumberRef)WiFiDeviceClientCopyProperty(client, kWiFiScaledRSSIKey);
 
 	CFNumberRef RSSI =
 		(CFNumberRef)CFDictionaryGetValue(data, CFSTR("RSSI_CTL_AGR"));
@@ -115,17 +119,21 @@ int wifiinfo(bool current, int argc, char **argv) {
 	printf("Strength: %f dBm\n", strength);
 	printf("Bars: %d\n", bars);
 	printf("Channel: %i\n",
-		   [(NSNumber *)CFBridgingRelease(WiFiNetworkGetProperty(
-			   network, CFSTR("CHANNEL"))) intValue]);
+		   [(__bridge_transfer NSNumber *)WiFiNetworkGetProperty(
+			   network, CFSTR("CHANNEL")) intValue]);
 	printf("AP Mode: %i\n",
-		   [(NSNumber *)CFBridgingRelease(WiFiNetworkGetProperty(
-			   network, CFSTR("AP_MODE"))) intValue]);
+		   [(__bridge_transfer NSNumber *)WiFiNetworkGetProperty(
+			   network, CFSTR("AP_MODE")) intValue]);
 	printf("Interface: %s\n",
-		   [(NSString *)CFBridgingRelease(
-			   WiFiDeviceClientGetInterfaceName(client)) UTF8String]);
+		   [(__bridge_transfer NSString *)WiFiDeviceClientGetInterfaceName(
+			   client) UTF8String]);
 	printf("Last Association Date: %s\n",
-		   [(NSDate *)CFBridgingRelease(
-				 WiFiNetworkGetLastAssociationDate(network)) descriptionWithLocale:nil].UTF8String);
+		   [(__bridge_transfer NSDate *)WiFiNetworkGetLastAssociationDate(
+				network) descriptionWithLocale:nil]
+			   .UTF8String);
+	printf("Password: %s\n",
+		   [(__bridge_transfer NSString *)WiFiNetworkCopyPassword(network)
+			   UTF8String]);
 
 	return 0;
 }

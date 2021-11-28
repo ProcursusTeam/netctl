@@ -8,7 +8,8 @@
 void wifiScanCallback(WiFiDeviceClientRef, CFArrayRef, int, void *);
 
 int wifiscan(void) {
-	WiFiManagerClientScheduleWithRunLoop(manager, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+	WiFiManagerClientScheduleWithRunLoop(manager, CFRunLoopGetCurrent(),
+										 kCFRunLoopDefaultMode);
 
 	WiFiDeviceClientScanAsync(
 		client, (__bridge CFDictionaryRef)[NSDictionary dictionary],
@@ -18,19 +19,19 @@ int wifiscan(void) {
 	return 0;
 }
 
-void wifiScanCallback(WiFiDeviceClientRef client, CFArrayRef results,
-				  int error, void *token) {
-	if (error != 0)
-		errx(1, "Failed to scan");
+void wifiScanCallback(WiFiDeviceClientRef client, CFArrayRef results, int error,
+					  void *token) {
+	if (error != 0) errx(1, "Failed to scan");
 
 	for (int i = 0; i < CFArrayGetCount(results); i++) {
-		NSString* SSID = (NSString*)CFBridgingRelease(WiFiNetworkGetSSID( (WiFiNetworkRef)CFArrayGetValueAtIndex(results, i) ));
+		NSString *SSID = (__bridge_transfer NSString *)WiFiNetworkGetSSID(
+			(WiFiNetworkRef)CFArrayGetValueAtIndex(results, i));
 		if ([SSID length] == 0) {
 			SSID = @"<hidden>";
 		}
 
-		printf("%s : %s\n",
-			[SSID UTF8String],
+		printf(
+			"%s : %s\n", [SSID UTF8String],
 			networkBSSID((WiFiNetworkRef)CFArrayGetValueAtIndex(results, i)));
 	}
 
