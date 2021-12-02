@@ -4,7 +4,7 @@ SRC := netctl.c
 SRC += utils/output.m
 SRC += cellular/cellular.m
 SRC += wifi/wifi.m wifi/wifi-connect.m wifi/wifi-scan.m wifi/wifi-power.m wifi/wifi-info.m wifi/wifi-forget.m
-SRC += airdrop/airdrop.c airdrop/airdrop-scan.m
+SRC += airdrop/airdrop.c airdrop/airdrop-scan.m airdrop/airdrop-send.m
 
 all: netctl
 
