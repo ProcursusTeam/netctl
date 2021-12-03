@@ -17,7 +17,7 @@ int airdrop(int argc, char **argv) {
 	} else if (!strcmp(argv[2], "send")) {
 		ret = airdropsend(argc - 2, argv + 2);
 	} else
-		errx(1, "invalid wifi subcommand");
+		errx(1, "invalid airdrop subcommand");
 
 	return ret;
 }
