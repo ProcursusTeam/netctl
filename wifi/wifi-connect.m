@@ -28,8 +28,10 @@ int wificonnect(int argc, char **argv) {
 	argc -= optind;
 	argv += optind;
 
-	if (argv[0] == NULL)
-		errx(1, "specify a SSID or BSSID");
+	if (argv[0] == NULL) {
+		fprintf(stderr, "Usage: netctl wifi connect [-bs] [-p password] SSID\n");
+		return 1;
+	}
 
 	WiFiNetworkRef network;
 

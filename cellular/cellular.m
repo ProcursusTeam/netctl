@@ -123,14 +123,11 @@ static int cells(void) {
 static int registration(NSString* arg) {
 	if ([arg isEqualToString:@"enable"]) {
 		_CTServerConnectionEnableRegistration(serverConnection);
-	}
-
-	else if ([arg isEqualToString:@"disable"]) {
+	} else if ([arg isEqualToString:@"disable"]) {
 		_CTServerConnectionDisableRegistration(serverConnection);
-	}
-
-	else {
-		errx(1, "must specify 'disable' or 'enable'");
+	} else {
+		fprintf(stderr, "Usage: netctl cellular registration [disable | enable]\n");
+		return 1;
 	}
 
 	// we do a little race conditioning
@@ -144,7 +141,7 @@ int cellular(int argc, char** argv) {
 	int ret = 0;
 
 	if (argc < 3) {
-		errx(1, "no cellular subcommand specified");
+		fprintf(stderr, "Usage: netctl cellular [number | info | call | registration | cells] [arguments]\n");
 		return 1;
 	}
 
@@ -152,35 +149,24 @@ int cellular(int argc, char** argv) {
 
 	if (!strcmp(cmd, "number")) {
 		return number();
-	}
-
-	if (!strcmp(cmd, "info")) {
+	} if (!strcmp(cmd, "info")) {
 		return info();
-	}
-
-	if (!strcmp(cmd, "call")) {
+	} else if (!strcmp(cmd, "call")) {
 		if (argc < 4) {
 			errx(1, "no phone number specified");
 			return 1;
 		}
-
 		return call([NSString stringWithUTF8String:argv[3]]);
-	}
-
-	if (!strcmp(cmd, "cells")) {
+	} else if (!strcmp(cmd, "cells")) {
 		return cells();
-	}
-
-	if (!strcmp(cmd, "registration")) {
+	} else if (!strcmp(cmd, "registration")) {
 		if (argc < 4) {
-			errx(1, "must specify 'disable' or 'enable'");
+			fprintf(stderr, "Usage: netctl cellular registration [disable | enable]\n");
 			return 1;
 		}
-
 		return registration([NSString stringWithUTF8String:argv[3]]);
 	}
 
-	errx(1, "invalid cellular subcommand");
-
+	fprintf(stderr, "Usage: netctl cellular [number | info | call | registration | cells] [arguments]\n");
 	return 1;
 }

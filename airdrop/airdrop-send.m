@@ -53,8 +53,10 @@ exit:
 
 
 int airdropsend(int argc, char **argv) {
-	if (argc < 3)
-		errx(1, "Not enough args");
+	if (argc < 3) {
+		fprintf(stderr, "Usage: netctl airdrop send reciever files...\n");
+		return 1;
+	}
 
 	name = [NSString stringWithUTF8String:argv[1]];
 

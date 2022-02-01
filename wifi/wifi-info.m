@@ -27,7 +27,10 @@ int wifiinfo(bool current, int argc, char **argv) {
 	argc -= optind;
 	argv += optind;
 
-	if (!current && argv[0] == NULL) errx(1, "no SSID or BSSID specified");
+	if (!current && argv[0] == NULL) {
+		fprintf(stderr, "Usage: netctl wifi info [-bs] [-k key] SSID\n");
+		return 1;
+	}
 
 	if (current)
 		network = WiFiDeviceClientCopyCurrentNetwork(client);

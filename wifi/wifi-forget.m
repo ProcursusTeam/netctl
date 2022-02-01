@@ -23,6 +23,11 @@ int wififorget(int argc, char **argv) {
 	argc -= optind;
 	argv += optind;
 
+	if (argv[0] == NULL) {
+		fprintf(stderr, "Usage: netctl wifi forget [-bs] SSID\n");
+		return 1;
+	}
+
 	if (bssid)
 		network = getNetworkWithBSSID(argv[0]);
 	else

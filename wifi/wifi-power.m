@@ -20,6 +20,9 @@ int wifipower(char *action) {
 	} else if (!strcmp(action, "off")) {
 		WiFiManagerClientSetProperty(manager, CFSTR("AllowEnable"),
 									 kCFBooleanFalse);
+	} else if (!strcmp(action, "help")) {
+		fprintf(stderr, "Usage: netctl wifi power [on | off | toggle | status | help]\n");
+		return 1;
 	}
 
 	return 0;

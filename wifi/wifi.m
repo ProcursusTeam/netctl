@@ -12,7 +12,7 @@ WiFiDeviceClientRef client;
 
 int wifi(int argc, char *argv[]) {
 	if (!argv[2]) {
-		errx(1, "no wifi subcommand specified");
+		fprintf(stderr, "Usage: netctl wifi [current | power | info | list | scan | connect | disconnect | forget] [arguments]\n");
 		return 1;
 	}
 
@@ -49,8 +49,10 @@ int wifi(int argc, char *argv[]) {
 		ret = WiFiDeviceClientDisassociate(client);
 	else if (!strcmp(argv[2], "forget")) {
 		ret = wififorget(argc - 2, argv + 2);
-	} else
-		errx(1, "invalid wifi subcommand");
+	} else {
+		fprintf(stderr, "Usage: netctl wifi [current | power | info | list | scan | connect | disconnect | forget] [arguments]\n");
+		return 1;
+	}
 	CFRelease(manager);
 	return ret;
 }

@@ -26,10 +26,8 @@ void airdropBrowserCallback(SFBrowserRef browser, SFNodeRef node) {
 }
 
 int airdropscan(int argc, char **argv) {
-	discovered =
-		CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks);
-	SFBrowserRef browser =
-		SFBrowserCreate(kCFAllocatorDefault, kSFBrowserKindAirDrop);
+	discovered = CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks);
+	SFBrowserRef browser = SFBrowserCreate(kCFAllocatorDefault, kSFBrowserKindAirDrop);
 	SFBrowserSetDispatchQueue(browser, dispatch_get_main_queue());
 	struct clientContext context;
 	SFBrowserSetClient(browser, airdropBrowserCallback, context);
