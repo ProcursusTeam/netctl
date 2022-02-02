@@ -15,10 +15,8 @@ void airdropBrowserCallBack(SFBrowserRef browser, SFNodeRef node, CFStringRef pr
 		SFNodeRef node = (SFNodeRef)CFArrayGetValueAtIndex(children, i);
 		if (![(__bridge NSArray *)discovered
 				containsObject:(__bridge id)node]) {
-			printf("%s", [(__bridge_transfer NSString *)SFNodeCopyComputerName(
-							 node) UTF8String]);
-			printf(" (%s)\n", [(__bridge_transfer NSString *)SFNodeCopyRealName(
-								  node) UTF8String]);
+			printf("%s", [(__bridge_transfer NSString *)SFNodeCopyComputerName(node) UTF8String]);
+			printf(" (%s)\n", [(__bridge_transfer NSString *)SFNodeCopyRealName(node) UTF8String]);
 			CFArrayAppendValue(discovered, node);
 		}
 	}

@@ -3,14 +3,18 @@
 #import <Sharing/Sharing.h>
 #include <err.h>
 #include <getopt.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
 NSString *name;
 NSMutableArray *files;
+bool foundNode = false;
 
 void airdropSendOperationCallback(SFOperationRef operation, SFOperationEvent event, CFDictionaryRef results, void *info) {
 	NSError *error;
+	NSNumber *copied, *total;
+
 	switch (event) {
 		case CANCELED:
 			exit(1);
@@ -20,8 +24,13 @@ void airdropSendOperationCallback(SFOperationRef operation, SFOperationEvent eve
 			CFRunLoopStop(CFRunLoopGetCurrent());
 			break;
 		case ERROR:
-			error = (__bridge_transfer NSError*)SFOperationCopyProperty(operation, kSFOperationErrorKey);
+			error = (__bridge_transfer NSError*)CFDictionaryGetValue(results, kSFOperationErrorKey);
 			errx(1, "%s", error.localizedDescription.UTF8String);
+			break;
+		case PROGRESS:
+			copied = (__bridge_transfer NSNumber*)CFDictionaryGetValue(results, kSFOperationBytesCopiedKey);
+			total = (__bridge_transfer NSNumber*)CFDictionaryGetValue(results, kSFOperationTotalBytesKey);
+			printf("%lld B/%lld B\n", copied.longLongValue, total.longLongValue);
 			break;
 		default:
 			break;
@@ -33,9 +42,10 @@ void airdropSendBrowserCallback(SFBrowserRef browser, SFNodeRef node, CFStringRe
 
 	for (int i = 0; i < CFArrayGetCount(children); i++) {
 		SFNodeRef node = (SFNodeRef)CFArrayGetValueAtIndex(children, i);
-		if ([(__bridge_transfer NSString *)SFNodeCopyComputerName(node)
-				isEqualToString:name] || [(__bridge_transfer NSString *)SFNodeCopyRealName(node)
-					   isEqualToString:name]) {
+		if (foundNode == false &&
+				([(__bridge_transfer NSString *)SFNodeCopyComputerName(node) isEqualToString:name] ||
+				 [(__bridge_transfer NSString *)SFNodeCopyRealName(node) isEqualToString:name])) {
+			foundNode = true;
 			SFOperationRef operation = SFOperationCreate(kCFAllocatorDefault, kSFOperationKindSender);
 			SFOperationSetProperty(operation, kSFOperationItemsKey, (__bridge CFArrayRef)files);
 			SFOperationSetProperty(operation, kSFOperationNodeKey, node);
@@ -43,10 +53,9 @@ void airdropSendBrowserCallback(SFBrowserRef browser, SFNodeRef node, CFStringRe
 			SFOperationSetDispatchQueue(operation, dispatch_get_main_queue());
 			SFOperationSetClient(operation, airdropSendOperationCallback, &context);
 			SFOperationResume(operation);
-			goto exit;
+			break;
 		}
 	}
-exit:
 	CFRelease(children);
 }
 
