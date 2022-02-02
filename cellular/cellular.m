@@ -15,7 +15,6 @@ static int number(void) {
 static int info(void) {
 	CTTelephonyNetworkInfo* info = [[CTTelephonyNetworkInfo alloc] init];
 	NSDictionary<NSString*, CTCarrier*>* serviceTech = info.serviceSubscriberCellularProviders;
-	NSDictionary<NSString*, NSString*>* accessTechnology = info.serviceCurrentRadioAccessTechnology;
 	CFDictionaryRef mobileEquipmentInfoCF;
 	_CTServerConnectionCopyMobileEquipmentInfo(serverConnection, &mobileEquipmentInfoCF);
 	NSDictionary* mobileEquipmentInfo = (__bridge_transfer NSDictionary*)mobileEquipmentInfoCF;
@@ -138,7 +137,6 @@ static int registration(NSString* arg) {
 
 int cellular(int argc, char** argv) {
 	const char* cmd = argv[2];
-	int ret = 0;
 
 	if (argc < 3) {
 		fprintf(stderr, "Usage: netctl cellular [number | info | call | registration | cells] [arguments]\n");

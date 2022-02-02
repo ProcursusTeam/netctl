@@ -90,8 +90,6 @@ void getNetworkScanCallback(WiFiDeviceClientRef client, CFArrayRef results,
 }
 
 WiFiNetworkRef getNetworkWithSSID(char *ssid) {
-	WiFiNetworkRef network;
-
 	CFArrayRef networks = WiFiManagerClientCopyNetworks(manager);
 
 	for (int i = 0; i < CFArrayGetCount(networks); i++) {
@@ -122,11 +120,10 @@ WiFiNetworkRef getNetworkWithSSID(char *ssid) {
 	errx(1, "Could not find network with specified SSID: %s", ssid);
 
 	/* NOT REACHED */
-	return network;
+	return NULL;
 }
 
 WiFiNetworkRef getNetworkWithBSSID(char *bssid) {
-	WiFiNetworkRef network;
 	CFArrayRef networks;
 
 	networks = WiFiManagerClientCopyNetworks(manager);
@@ -159,5 +156,5 @@ WiFiNetworkRef getNetworkWithBSSID(char *bssid) {
 	errx(1, "Could not find network with specified BSSID: %s", bssid);
 
 	/* NOT REACHED */
-	return 0;
+	return NULL;
 }
