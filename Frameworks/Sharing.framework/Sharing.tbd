@@ -1,13 +1,10 @@
 --- !tapi-tbd
 tbd-version:     4
-targets:         [ arm64-ios ]
-uuids:
-  - target:          arm64-ios
-    value:           6033DA5E-07F9-3732-B231-48608C60ED3D
+targets:         [ arm64-ios, arm64e-ios, arm64-macos, arm64e-macos, x86_64-macos ]
 install-name:    '/System/Library/PrivateFrameworks/Sharing.framework/Sharing'
 current-version: 1622.1.3
 exports:
-  - targets:         [ arm64-ios ]
+  - targets:         [ arm64-ios, arm64-macos, arm64e-macos, x86_64-macos ]
     symbols:         [ _NSDataFromHexString, _NSStringLooksLikeBTAddress, _RPCompanionLinkDeviceIsEqualToSFDevice,
                        _SDAutoUnlockManagerMetricAWDLBringUpKey, _SDAutoUnlockManagerMetricAWDLPeerFoundKey,
                        _SDAutoUnlockManagerMetricAWDLRangingKey, _SDAutoUnlockManagerMetricAttemptTimeKey,

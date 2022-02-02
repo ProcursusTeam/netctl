@@ -14,12 +14,20 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
+#if NO_WIFI == 0
 	if (!strcmp(argv[1], "wifi"))
 		return wifi(argc, argv);
-	else if (!strcmp(argv[1], "cellular"))
+#endif
+
+#if NO_CELLULAR == 0
+	if (!strcmp(argv[1], "cellular"))
 		return cellular(argc, argv);
-	else if (!strcmp(argv[1], "airdrop"))
+#endif
+
+#if NO_AIRDROP == 0
+	if (!strcmp(argv[1], "airdrop"))
 		return airdrop(argc, argv);
+#endif
 
 	usage();
 	return 1;
