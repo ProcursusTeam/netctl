@@ -8,7 +8,7 @@
 
 CFMutableArrayRef discovered;
 
-void airdropBrowserCallback(SFBrowserRef browser, SFNodeRef node) {
+void airdropBrowserCallBack(SFBrowserRef browser, SFNodeRef node, CFStringRef protocol, SFBrowserFlags flags, SFBrowserError error, void *info) {
 	CFArrayRef children = SFBrowserCopyChildren(browser, node);
 
 	for (int i = 0; i < CFArrayGetCount(children); i++) {
@@ -29,8 +29,9 @@ int airdropscan(int argc, char **argv) {
 	discovered = CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks);
 	SFBrowserRef browser = SFBrowserCreate(kCFAllocatorDefault, kSFBrowserKindAirDrop);
 	SFBrowserSetDispatchQueue(browser, dispatch_get_main_queue());
-	struct clientContext context;
-	SFBrowserSetClient(browser, airdropBrowserCallback, context);
+	SFBrowserContext context = {};
+
+	SFBrowserSetClient(browser, airdropBrowserCallBack, &context);
 	SFBrowserOpenNode(browser, 0, 0, 0);
 
 	CFRunLoopRun();

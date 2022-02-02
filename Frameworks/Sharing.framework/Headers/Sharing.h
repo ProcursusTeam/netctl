@@ -21,16 +21,35 @@ void SFBrowserOpenNode(SFBrowserRef, SFNodeRef, CFTypeRef, CFOptionFlags);
 CFArrayRef SFBrowserCopyChildren(SFBrowserRef, SFNodeRef);
 void SFBrowserInvalidate(SFBrowserRef);
 
-struct clientContext {
+typedef CF_OPTIONS(CFOptionFlags, SFBrowserFlags) {
+	kSFBrowserFlagsNone = 0,
+	kSFBrowserFlagsGuest = 1,
+	kSFBrowserFlagsAnonymous = 2,
+	kSFBrowserFlagsForceUI = 4,
+	kSFBrowserFlagsAllowUI = 8,
+	kSFBrowserFlagsAsk = 16
+};
+
+enum SFBrowserError {
+	kSFBrowserErrorNone = 0,
+	kSFBrowserErrorFailed = -1,
+	kSFBrowserErrorNotAuthorized = -2,
+	kSFBrowserErrorBadArgument = -3
+};
+typedef enum SFBrowserError SFBrowserError;
+
+struct SFContext {
 	CFIndex version;
-	CFTypeRef info;
+	void *info;
 	CFAllocatorRetainCallBack retain;
 	CFAllocatorReleaseCallBack release;
 	CFAllocatorCopyDescriptionCallBack copyDescription;
 };
+typedef struct SFContext SFBrowserContext;
+typedef struct SFContext SFOperationContext;
 
-typedef void (*SFBrowserCallback)(SFBrowserRef, SFNodeRef);
-void SFBrowserSetClient(SFBrowserRef, SFBrowserCallback, struct clientContext);
+typedef void (*SFBrowserCallBack)(SFBrowserRef browser, SFNodeRef node, CFStringRef protocol, SFBrowserFlags flags, SFBrowserError error, void *info);
+void SFBrowserSetClient(SFBrowserRef, SFBrowserCallBack, SFBrowserContext*);
 
 enum SFOperationEvent {
 	UNKNOWN = 0,
@@ -50,10 +69,11 @@ enum SFOperationEvent {
 	BLOCKED,
 	CONVERTING
 };
+typedef enum SFOperationEvent SFOperationEvent;
 
 SFOperationRef SFOperationCreate(CFAllocatorRef, CFStringRef);
-typedef void (*SFOperationCallback)(SFOperationRef, CFIndex, CFDictionaryRef);
-void SFOperationSetClient(SFOperationRef, SFOperationCallback, struct clientContext);
+typedef void (*SFOperationCallBack)(SFOperationRef operation, SFOperationEvent event, CFDictionaryRef results, void *info);
+void SFOperationSetClient(SFOperationRef, SFOperationCallBack, SFOperationContext*);
 void SFOperationSetProperty(SFOperationRef, CFStringRef, CFTypeRef);
 void SFOperationSetDispatchQueue(SFOperationRef, dispatch_queue_t);
 void SFOperationResume(SFOperationRef);

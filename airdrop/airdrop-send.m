@@ -9,9 +9,9 @@
 NSString *name;
 NSMutableArray *files;
 
-void airdropSendOperationCallback(SFOperationRef operation, CFIndex ret, CFDictionaryRef results) {
+void airdropSendOperationCallback(SFOperationRef operation, SFOperationEvent event, CFDictionaryRef results, void *info) {
 	NSError *error;
-	switch (ret) {
+	switch (event) {
 		case CANCELED:
 			exit(1);
 			CFRunLoopStop(CFRunLoopGetCurrent());
@@ -28,7 +28,7 @@ void airdropSendOperationCallback(SFOperationRef operation, CFIndex ret, CFDicti
 	}
 }
 
-void airdropSendBrowserCallback(SFBrowserRef browser, SFNodeRef node) {
+void airdropSendBrowserCallback(SFBrowserRef browser, SFNodeRef node, CFStringRef protocol, SFBrowserFlags flags, SFBrowserError error, void *info) {
 	CFArrayRef children = SFBrowserCopyChildren(browser, node);
 
 	for (int i = 0; i < CFArrayGetCount(children); i++) {
@@ -39,9 +39,9 @@ void airdropSendBrowserCallback(SFBrowserRef browser, SFNodeRef node) {
 			SFOperationRef operation = SFOperationCreate(kCFAllocatorDefault, kSFOperationKindSender);
 			SFOperationSetProperty(operation, kSFOperationItemsKey, (__bridge CFArrayRef)files);
 			SFOperationSetProperty(operation, kSFOperationNodeKey, node);
-			struct clientContext context;
+			SFOperationContext context = {};
 			SFOperationSetDispatchQueue(operation, dispatch_get_main_queue());
-			SFOperationSetClient(operation, airdropSendOperationCallback, context);
+			SFOperationSetClient(operation, airdropSendOperationCallback, &context);
 			SFOperationResume(operation);
 			goto exit;
 		}
@@ -71,8 +71,8 @@ int airdropsend(int argc, char **argv) {
 
 	SFBrowserRef browser = SFBrowserCreate(kCFAllocatorDefault, kSFBrowserKindAirDrop);
 	SFBrowserSetDispatchQueue(browser, dispatch_get_main_queue());
-	struct clientContext context;
-	SFBrowserSetClient(browser, airdropSendBrowserCallback, context);
+	SFBrowserContext context = {};
+	SFBrowserSetClient(browser, airdropSendBrowserCallback, &context);
 	SFBrowserOpenNode(browser, 0, 0, 0);
 
 	CFRunLoopRun();
