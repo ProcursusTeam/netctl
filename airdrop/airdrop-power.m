@@ -8,7 +8,6 @@ int airdroppower(char *action) {
 
 	if (action == NULL || !strcmp(action, "status")) {
 		NSLog(@"%@", SFOperationCopyProperty(operation, kSFOperationDiscoverableModeKey));
-		SFOperation
 		return 0;
 	} else if (!strcmp(action, "everyone") || !strcmp(action, "on")) {
 		SFOperationSetProperty(operation, kSFOperationDiscoverableModeKey, kSFOperationDiscoverableModeEveryone);
