@@ -3,8 +3,9 @@ CC  ?= xcrun -sdk iphoneos cc -arch arm64
 NO_CELLULAR ?= 0
 NO_WIFI     ?= 0
 NO_AIRDROP  ?= 0
+NO_AIRPLANE ?= 0
 
-CFLAGS += -DNO_CELLULAR=$(NO_CELLULAR) -DNO_WIFI=$(NO_WIFI) -DNO_AIRDROP=$(NO_AIRDROP)
+CFLAGS += -DNO_CELLULAR=$(NO_CELLULAR) -DNO_WIFI=$(NO_WIFI) -DNO_AIRDROP=$(NO_AIRDROP) -DNO_AIRPLANE=$(NO_AIRPLANE)
 
 SRC := netctl.c
 SRC += utils/output.m
@@ -19,6 +20,10 @@ endif
 ifneq ($(NO_AIRDROP),1)
 SRC += airdrop/airdrop.c airdrop/airdrop-scan.m airdrop/airdrop-send.m airdrop/airdrop-power.m
 LIBS += -framework Sharing
+endif
+ifneq ($(NO_AIRPLANE),1)
+SRC += airplane/airplane.m
+LIBS += -framework AppSupport
 endif
 
 all: netctl

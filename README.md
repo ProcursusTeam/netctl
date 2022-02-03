@@ -21,3 +21,7 @@
 * [ ] `netctl airdrop scan`
 * [ ] `netctl airdrop send`
 * [ ] `netctl airdrop power status/everyone/contacts/off`
+
+## airplane
+* [x] `netctl airplane status`
+* [ ] `netctl airplane [toggle | on | off]`

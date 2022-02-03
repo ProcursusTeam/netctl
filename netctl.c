@@ -5,6 +5,7 @@
 int wifi(int, char **);
 int cellular(int, char **);
 int airdrop(int, char **);
+int airplane(char *);
 
 void usage(void);
 
@@ -27,6 +28,11 @@ int main(int argc, char *argv[]) {
 #if NO_AIRDROP == 0
 	if (!strcmp(argv[1], "airdrop"))
 		return airdrop(argc, argv);
+#endif
+
+#if NO_AIRPLANE == 0
+	if (!strcmp(argv[1], "airplane"))
+		return airplane(argc > 2 ? argv[2] : NULL);
 #endif
 
 	usage();
