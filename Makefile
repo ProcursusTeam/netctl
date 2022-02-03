@@ -17,7 +17,7 @@ SRC += wifi/wifi.m wifi/wifi-connect.m wifi/wifi-scan.m wifi/wifi-power.m wifi/w
 LIBS += -framework MobileWiFi
 endif
 ifneq ($(NO_AIRDROP),1)
-SRC += airdrop/airdrop.c airdrop/airdrop-scan.m airdrop/airdrop-send.m
+SRC += airdrop/airdrop.c airdrop/airdrop-scan.m airdrop/airdrop-send.m airdrop/airdrop-power.m
 LIBS += -framework Sharing
 endif
 
