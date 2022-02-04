@@ -1,4 +1,7 @@
-CC  ?= xcrun -sdk iphoneos cc -arch arm64
+CC    ?= xcrun -sdk iphoneos cc -arch arm64
+STRIP ?= xcrun -sdk iphoneos strip
+
+LDID  ?= ldid
 
 NO_CELLULAR ?= 0
 NO_WIFI     ?= 0
@@ -36,7 +39,8 @@ all: netctl
 
 netctl: $(SRC:%=%.o)
 	$(CC) $(CFLAGS) $(LDFLAGS) -F Frameworks -fobjc-arc $^ -o $@ $(LIBS)
-	ldid -Cadhoc -Sentitlements.plist $@
+	$(STRIP) $@
+	-$(LDID) -Cadhoc -Sentitlements.plist $@
 
 clean:
 	rm -rf netctl *.dSYM $(SRC:%=%.o)
