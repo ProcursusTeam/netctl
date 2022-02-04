@@ -42,7 +42,7 @@ int wifi(int argc, char *argv[]) {
 		else
 			errx(1, "invalid action");
 	} else if (!strcmp(argv[2], "scan"))
-		ret = wifiscan();
+		ret = wifiscan(argc - 2, argv + 2);
 	else if (!strcmp(argv[2], "connect"))
 		ret = wificonnect(argc - 2, argv + 2);
 	else if (!strcmp(argv[2], "disconnect"))

@@ -59,8 +59,6 @@ void airdropSendBrowserCallback(SFBrowserRef browser, SFNodeRef node, CFStringRe
 	CFRelease(children);
 }
 
-
-
 int airdropsend(int argc, char **argv) {
 	if (argc < 3) {
 		fprintf(stderr, "Usage: netctl airdrop send reciever files...\n");

@@ -3,7 +3,7 @@
 int wifilist(void);
 int wifiinfo(bool, int, char **);
 int wifipower(char *);
-int wifiscan(void);
+int wifiscan(int, char **);
 int wificonnect(int, char **);
 int wififorget(int, char **);
 WiFiNetworkRef getNetworkWithSSID(char *ssid);
