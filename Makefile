@@ -11,7 +11,7 @@ NO_AIRPLANE ?= 0
 CFLAGS += -DNO_CELLULAR=$(NO_CELLULAR) -DNO_WIFI=$(NO_WIFI) -DNO_AIRDROP=$(NO_AIRDROP) -DNO_AIRPLANE=$(NO_AIRPLANE)
 
 SRC := netctl.c
-SRC += utils/output.m
+SRC += utils/output.m utils/strtonum.c
 ifneq ($(NO_CELLULAR),1)
 SRC += cellular/cellular.m
 LIBS += -framework CoreTelephony

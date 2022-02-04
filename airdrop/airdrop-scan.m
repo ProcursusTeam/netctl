@@ -24,6 +24,27 @@ void airdropBrowserCallBack(SFBrowserRef browser, SFNodeRef node, CFStringRef pr
 }
 
 int airdropscan(int argc, char **argv) {
+	int ch, index;
+	int timeout = 30;
+	const char *errstr;
+
+	struct option opts[] = {
+		{ "timeout", required_argument, 0, 't' },
+		{ NULL, 0, NULL, 0 }
+	};
+
+	while ((ch = getopt_long(argc, argv, "t:", opts, &index)) != -1) {
+		switch (ch) {
+			case 't':
+				timeout = strtonum(optarg, 0, INT_MAX, &errstr);
+				if (errstr != NULL)
+					err(1, "%s", optarg);
+				break;
+		}
+	}
+	argc -= optind;
+	argv += optind;
+
 	discovered = CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks);
 	SFBrowserRef browser = SFBrowserCreate(kCFAllocatorDefault, kSFBrowserKindAirDrop);
 	SFBrowserSetDispatchQueue(browser, dispatch_get_main_queue());
@@ -32,7 +53,7 @@ int airdropscan(int argc, char **argv) {
 	SFBrowserSetClient(browser, airdropBrowserCallBack, &context);
 	SFBrowserOpenNode(browser, 0, 0, 0);
 
-	CFRunLoopRun();
+	CFRunLoopRunInMode(kCFRunLoopDefaultMode, timeout, false);
 
 	CFRelease(discovered);
 	SFBrowserInvalidate(browser);
