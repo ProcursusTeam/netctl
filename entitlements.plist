@@ -32,5 +32,9 @@
 	<true/>
 	<key>com.apple.private.airdrop.discovery</key>
 	<true/>
+	<key>com.apple.SystemConfiguration.SCPreferences-write-access</key>
+	<array>
+		<string>com.apple.radios.plist</string>
+	</array>
 </dict>
 </plist>
