@@ -6,7 +6,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "../include/output.h"
+
 CFMutableArrayRef discovered;
+
+NSMutableArray* devices;
 
 void airdropBrowserCallBack(SFBrowserRef browser, SFNodeRef node, CFStringRef protocol, SFBrowserFlags flags, SFBrowserError error, void *info) {
 	CFArrayRef children = SFBrowserCopyChildren(browser, node);
@@ -15,8 +19,15 @@ void airdropBrowserCallBack(SFBrowserRef browser, SFNodeRef node, CFStringRef pr
 		SFNodeRef node = (SFNodeRef)CFArrayGetValueAtIndex(children, i);
 		if (![(__bridge NSArray *)discovered
 				containsObject:(__bridge id)node]) {
-			printf("name: '%s',", [(__bridge_transfer NSString *)SFNodeCopyComputerName(node) UTF8String]);
-			printf(" id: '%s'`\n", [(__bridge_transfer NSString *)SFNodeCopyRealName(node) UTF8String]);
+
+			NSString* name = (__bridge_transfer NSString *)SFNodeCopyComputerName(node);
+			NSString* ident = (__bridge_transfer NSString *)SFNodeCopyRealName(node);
+
+			[devices addObjectsFromArray:@[
+				@{ @"name" : name},
+				@{ @"id" : ident}
+			]];
+
 			CFArrayAppendValue(discovered, node);
 		}
 	}
@@ -27,6 +38,8 @@ int airdropscan(int argc, char **argv) {
 	int ch, index;
 	int timeout = 30;
 	const char *errstr;
+
+	devices = [NSMutableArray array];
 
 	struct option opts[] = {
 		{ "timeout", required_argument, 0, 't' },
@@ -53,10 +66,14 @@ int airdropscan(int argc, char **argv) {
 	SFBrowserSetClient(browser, airdropBrowserCallBack, &context);
 	SFBrowserOpenNode(browser, 0, 0, 0);
 
+	fprintf(stderr, "scanning... timeout set for %d seconds\n", timeout);
+
 	CFRunLoopRunInMode(kCFRunLoopDefaultMode, timeout, false);
 
 	CFRelease(discovered);
 	SFBrowserInvalidate(browser);
+
+	[NCOutput printArray:devices withJSON:YES];
 
 	return 0;
 }
