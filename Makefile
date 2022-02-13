@@ -28,6 +28,10 @@ ifneq ($(NO_AIRPLANE),1)
 SRC += airplane/airplane.m
 LIBS += -framework AppSupport
 endif
+ifneq ($(NO_MONITOR),1)
+SRC += monitor/monitor.m
+LIBS += -framework NetworkStatistics
+endif
 
 all: netctl
 
