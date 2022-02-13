@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
 
 #if NO_AIRPLANE == 0
 	if (!strcmp(argv[1], "airplane"))
-		return airplane(argc, argv);
+		return airplane(argc > 2 ? argv[2] : NULL);
 #endif
 
 #if NO_MONITOR == 0
