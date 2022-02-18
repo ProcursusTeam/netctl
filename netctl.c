@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
 
 #if NO_MONITOR == 0
 	if (!strcmp(argv[1], "monitor"))
-		return nctl_monitor(argc, argv);
+		return nctl_monitor(argc-1, argv+1);
 #endif
 
 	usage();
