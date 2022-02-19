@@ -2,13 +2,19 @@
 #import <NetworkStatistics/NetworkStatistics.h>
 #include <err.h>
 
-void (^description_block)(CFDictionaryRef) = ^(CFDictionaryRef cfdict) {
-  CFNumberRef pid = CFDictionaryGetValue(cfdict, kNStatSrcKeyPID);
-  CFNumberRef txcount = CFDictionaryGetValue(cfdict, kNStatSrcKeyTxBytes);
+void (^description_block)(CFDictionaryRef) = ^(CFDictionaryRef cfDict) {
+  NSDictionary* dict = (__bridge NSDictionary*)cfDict;
 
-  CFStringRef pname = CFDictionaryGetValue(cfdict, kNStatSrcKeyProcessName);
+  NSNumber* pid = dict[kNStatSrcKeyPID];
+  NSNumber* txcount = dict[kNStatSrcKeyTxBytes];
+  NSNumber* rxcount = dict[kNStatSrcKeyRxBytes];
 
-  NSLog(@"pid: %@, pname: %@, tx: %@", pid, pname, txcount);
+  NSString* pname = dict[kNStatSrcKeyProcessName];
+  NSString* provider = dict[kNStatSrcKeyProvider];
+
+  printf("%s(%d): TX: %d, RX: %d, PROV: %s\n", [pname UTF8String],
+		 [pid intValue], [txcount intValue], [rxcount intValue],
+		 [provider UTF8String]);
 };
 
 void (^callback)(void*, void*) = ^(NStatSourceRef ref, void* arg2) {
