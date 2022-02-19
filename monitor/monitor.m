@@ -13,6 +13,7 @@ void (^description_block)(CFDictionaryRef) = ^(CFDictionaryRef cfdict) {
 
 void (^callback)(void*, void*) = ^(NStatSourceRef ref, void* arg2) {
   NStatSourceSetDescriptionBlock(ref, description_block);
+  NStatSourceQueryDescription(ref);
 };
 
 int nctl_monitor(int argc, char** argv) {
