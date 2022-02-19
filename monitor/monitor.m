@@ -1,10 +1,17 @@
 #include <Foundation/Foundation.h>
 #import <NetworkStatistics/NetworkStatistics.h>
 
+void(^description_block)(CFDictionaryRef) = ^(CFDictionaryRef cfdict) {
+    CFNumberRef pid = CFDictionaryGetValue(cfdict, kNStatSrcKeyPID);
+    CFNumberRef txcount = CFDictionaryGetValue(cfdict, kNStatSrcKeyTxBytes);
+
+    CFStringRef pname = CFDictionaryGetValue(cfdict, kNStatSrcKeyProcessName);
+
+    NSLog(@"pid: %@, pname: %@, tx: %@", pid, pname, txcount);
+};
+
 void(^callback)(void*, void*) = ^(NStatSourceRef ref, void* arg2) {
-    static int ctr = 0;
-    printf("HELLO %d\n", ctr);
-    ctr++;
+    NStatSourceSetDescriptionBlock(ref, description_block);
 };
 
 int nctl_monitor(int argc, char** argv) {
