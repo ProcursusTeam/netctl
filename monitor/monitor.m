@@ -2,6 +2,10 @@
 #import <NetworkStatistics/NetworkStatistics.h>
 #include <err.h>
 
+static inline BOOL isTCP(NSString* provider) {
+	return [provider isEqualToString:@"TCP"];
+}
+
 void (^description_block)(CFDictionaryRef) = ^(CFDictionaryRef cfDict) {
   NSDictionary* dict = (__bridge NSDictionary*)cfDict;
 
@@ -11,10 +15,21 @@ void (^description_block)(CFDictionaryRef) = ^(CFDictionaryRef cfDict) {
 
   NSString* pname = dict[kNStatSrcKeyProcessName];
   NSString* provider = dict[kNStatSrcKeyProvider];
+  NSString* state = dict[kNStatSrcKeyTCPState];
 
-  printf("%s(%d): TX: %d, RX: %d, PROV: %s\n", [pname UTF8String],
-		 [pid intValue], [txcount intValue], [rxcount intValue],
-		 [provider UTF8String]);
+  NSMutableString* outputstr = [NSMutableString string];
+
+  [outputstr appendString:[NSString stringWithFormat:@"%@(%@): ", pname, pid]];
+  if (isTCP(provider)) {
+	  [outputstr
+		  appendString:[NSString stringWithFormat:@"TCPSTATE: %@, ", state]];
+  }
+
+  [outputstr
+	  appendString:[NSString stringWithFormat:@"TX: %@, RX: %@, PROV: %@",
+											  txcount, rxcount, provider]];
+
+  puts([outputstr UTF8String]);
 };
 
 void (^callback)(void*, void*) = ^(NStatSourceRef ref, void* arg2) {
