@@ -35,7 +35,7 @@ SRC += airplane/airplane.m
 LIBS += -framework AppSupport
 endif
 ifneq ($(NO_MONITOR),1)
-SRC += monitor/monitor.m
+SRC += monitor/monitor.m monitor/SourceInfo.m monitor/DataInfo.m
 LIBS += -framework NetworkStatistics
 endif
 

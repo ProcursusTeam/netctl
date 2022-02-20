@@ -1,35 +1,14 @@
 #include <Foundation/Foundation.h>
 #import <NetworkStatistics/NetworkStatistics.h>
+#include <arpa/inet.h>
 #include <err.h>
 
-static inline BOOL isTCP(NSString* provider) {
-	return [provider isEqualToString:@"TCP"];
-}
+#include "SourceInfo.h"
 
 void (^description_block)(CFDictionaryRef) = ^(CFDictionaryRef cfDict) {
   NSDictionary* dict = (__bridge NSDictionary*)cfDict;
-
-  NSNumber* pid = dict[kNStatSrcKeyPID];
-  NSNumber* txcount = dict[kNStatSrcKeyTxBytes];
-  NSNumber* rxcount = dict[kNStatSrcKeyRxBytes];
-
-  NSString* pname = dict[kNStatSrcKeyProcessName];
-  NSString* provider = dict[kNStatSrcKeyProvider];
-  NSString* state = dict[kNStatSrcKeyTCPState];
-
-  NSMutableString* outputstr = [NSMutableString string];
-
-  [outputstr appendString:[NSString stringWithFormat:@"%@(%@): ", pname, pid]];
-  if (isTCP(provider)) {
-	  [outputstr
-		  appendString:[NSString stringWithFormat:@"TCPSTATE: %@, ", state]];
-  }
-
-  [outputstr
-	  appendString:[NSString stringWithFormat:@"TX: %@, RX: %@, PROV: %@",
-											  txcount, rxcount, provider]];
-
-  puts([outputstr UTF8String]);
+  NCSourceInfo* info = [[NCSourceInfo alloc] initWithDict:dict];
+  printf("%s|%s\n", [info.timeStamp UTF8String], [info.processName UTF8String]);
 };
 
 void (^callback)(void*, void*) = ^(NStatSourceRef ref, void* arg2) {
