@@ -2,13 +2,26 @@
 #import <NetworkStatistics/NetworkStatistics.h>
 #include <arpa/inet.h>
 #include <err.h>
+#include <netdb.h>
+#include <sys/socket.h>
 
 #include "SourceInfo.h"
 
 void (^description_block)(CFDictionaryRef) = ^(CFDictionaryRef cfDict) {
   NSDictionary* dict = (__bridge NSDictionary*)cfDict;
   NCSourceInfo* info = [[NCSourceInfo alloc] initWithDict:dict];
-  printf("%s|%s\n", [info.timeStamp UTF8String], [info.processName UTF8String]);
+
+  char localHostname[256] = {0};
+  getnameinfo(info.localAddress, info.localAddress->sa_len, localHostname,
+			  sizeof(localHostname), NULL, 0, NI_NUMERICHOST);
+
+  char remoteHostname[256] = {0};
+  getnameinfo(info.remoteAddress, info.remoteAddress->sa_len, remoteHostname,
+			  sizeof(remoteHostname), NULL, 0, NI_NUMERICHOST);
+
+  printf("%-10s\t%20s(%s)%30s\t%s\n", [info.timeStamp UTF8String],
+		 [info.protocol UTF8String], [info.TCPState UTF8String], localHostname,
+		 remoteHostname);
 };
 
 void (^callback)(void*, void*) = ^(NStatSourceRef ref, void* arg2) {
