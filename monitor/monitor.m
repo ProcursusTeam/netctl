@@ -19,9 +19,12 @@ void (^description_block)(CFDictionaryRef) = ^(CFDictionaryRef cfDict) {
   getnameinfo(info.remoteAddress, info.remoteAddress->sa_len, remoteHostname,
 			  sizeof(remoteHostname), NULL, 0, NI_NUMERICHOST);
 
-  printf("%-10s\t%20s(%s)%30s\t%s\n", [info.timeStamp UTF8String],
-		 [info.protocol UTF8String], [info.TCPState UTF8String], localHostname,
-		 remoteHostname);
+  printf("%s\t%20s(%s)%30s\t%30s\ttx:%llu rx:%llu\t %s(%d)\n",
+		 info.timeStamp.UTF8String, info.protocol.UTF8String,
+		 info.TCPState.UTF8String, localHostname, remoteHostname,
+		 info.dataProcessed.tx.unsignedLongLongValue,
+		 info.dataProcessed.rx.unsignedLongLongValue,
+		 info.processName.UTF8String, info.PID.intValue);
 };
 
 void (^callback)(void*, void*) = ^(NStatSourceRef ref, void* arg2) {
