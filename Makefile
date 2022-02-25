@@ -38,6 +38,10 @@ ifneq ($(NO_MONITOR),1)
 SRC += monitor/monitor.m monitor/SourceInfo.m monitor/DataInfo.m
 LIBS += -framework NetworkStatistics
 endif
+ifneq ($(NO_PRINT),1)
+SRC += print/print.m
+LIBS += -lcups
+endif
 
 all: netctl
 

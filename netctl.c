@@ -6,6 +6,7 @@ int wifi(int, char **);
 int cellular(int, char **);
 int airdrop(int, char **);
 int nctl_monitor(int, char **);
+int nctl_print(int, char **);
 int airplane(char *);
 
 void usage(void);
@@ -37,12 +38,16 @@ int main(int argc, char *argv[]) {
 	if (!strcmp(argv[1], "monitor")) return nctl_monitor(argc - 2, argv + 2);
 #endif
 
+#if NO_PRINT == 0
+	if (!strcmp(argv[1], "print")) return nctl_print(argc - 2, argv + 2);
+#endif
+
 	usage();
 	return 1;
 }
 
 void usage() {
-	fprintf(
-		stderr,
-		"Usage: netctl [airdrop | cellular | wifi | monitor] [arguments]\n");
+	fprintf(stderr,
+			"Usage: netctl [airdrop | cellular | wifi | monitor | print] "
+			"[arguments]\n");
 }
