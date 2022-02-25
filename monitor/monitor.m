@@ -39,7 +39,7 @@ void (^callback)(void*, void*) = ^(NStatSourceRef ref, void* arg2) {
 };
 
 int nctl_monitor(int argc, char** argv) {
-	if (argc < 2) {
+	if (argc < 1) {
 		errno = EINVAL;
 		errx(1, "not enough args");
 	}
@@ -47,13 +47,13 @@ int nctl_monitor(int argc, char** argv) {
 	BOOL monitorTCP = NO;
 	BOOL monitorUDP = NO;
 
-	if (!strcmp(argv[1], "tcp")) {
+	if (!strcmp(argv[0], "tcp")) {
 		monitorTCP = YES;
 	}
-	if (!strcmp(argv[1], "udp")) {
+	if (!strcmp(argv[0], "udp")) {
 		monitorUDP = YES;
 	}
-	if (!strcmp(argv[1], "all")) {
+	if (!strcmp(argv[0], "all")) {
 		monitorTCP = YES;
 		monitorUDP = YES;
 	}

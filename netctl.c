@@ -17,18 +17,15 @@ int main(int argc, char *argv[]) {
 	}
 
 #if NO_WIFI == 0
-	if (!strcmp(argv[1], "wifi"))
-		return wifi(argc, argv);
+	if (!strcmp(argv[1], "wifi")) return wifi(argc, argv);
 #endif
 
 #if NO_CELLULAR == 0
-	if (!strcmp(argv[1], "cellular"))
-		return cellular(argc, argv);
+	if (!strcmp(argv[1], "cellular")) return cellular(argc, argv);
 #endif
 
 #if NO_AIRDROP == 0
-	if (!strcmp(argv[1], "airdrop"))
-		return airdrop(argc, argv);
+	if (!strcmp(argv[1], "airdrop")) return airdrop(argc, argv);
 #endif
 
 #if NO_AIRPLANE == 0
@@ -37,8 +34,7 @@ int main(int argc, char *argv[]) {
 #endif
 
 #if NO_MONITOR == 0
-	if (!strcmp(argv[1], "monitor"))
-		return nctl_monitor(argc-1, argv+1);
+	if (!strcmp(argv[1], "monitor")) return nctl_monitor(argc - 2, argv + 2);
 #endif
 
 	usage();
@@ -46,5 +42,7 @@ int main(int argc, char *argv[]) {
 }
 
 void usage() {
-	fprintf(stderr, "Usage: netctl [airdrop | cellular | wifi | monitor] [arguments]\n");
+	fprintf(
+		stderr,
+		"Usage: netctl [airdrop | cellular | wifi | monitor] [arguments]\n");
 }
