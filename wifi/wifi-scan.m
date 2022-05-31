@@ -9,7 +9,7 @@
 void wifiScanCallback(WiFiDeviceClientRef, CFArrayRef, int, void *);
 
 int wifiscan(int argc, char **argv) {
-	int ch, index;
+	int ch;
 	int timeout = 30;
 	const char *errstr;
 
@@ -18,7 +18,7 @@ int wifiscan(int argc, char **argv) {
 		{ NULL, 0, NULL, 0 }
 	};
 
-	while ((ch = getopt_long(argc, argv, "t:", opts, &index)) != -1) {
+	while ((ch = getopt_long(argc, argv, "t:", opts, NULL)) != -1) {
 		switch (ch) {
 			case 't':
 				timeout = strtonum(optarg, 0, INT_MAX, &errstr);

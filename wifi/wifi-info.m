@@ -4,6 +4,8 @@
 #include <err.h>
 
 #include "wifi.h"
+#include "output.h"
+#include "netctl.h"
 
 int wifiinfo(bool current, int argc, char **argv) {
 	WiFiNetworkRef network;
@@ -81,21 +83,18 @@ int wifiinfo(bool current, int argc, char **argv) {
 		return 0;
 	}
 
-	printf(
-		"SSID: %s\n",
-		[(__bridge_transfer NSString *)WiFiNetworkGetSSID(network) UTF8String]);
-	printf("BSSID: %s\n", networkBSSID(network));
-	printf("WEP: %s\n", WiFiNetworkIsWEP(network) ? "yes" : "no");
-	printf("WPA: %s\n", WiFiNetworkIsWPA(network) ? "yes" : "no");
-	printf("EAP: %s\n", WiFiNetworkIsEAP(network) ? "yes" : "no");
-	printf("Apple Hotspot: %s\n",
-		   WiFiNetworkIsApplePersonalHotspot(network) ? "yes" : "no");
-	printf("Adhoc: %s\n", WiFiNetworkIsAdHoc(network) ? "yes" : "no");
-	printf("Hidden: %s\n", WiFiNetworkIsHidden(network) ? "yes" : "no");
-	printf("Password Required: %s\n",
-		   WiFiNetworkRequiresPassword(network) ? "yes" : "no");
-	printf("Username Required: %s\n",
-		   WiFiNetworkRequiresUsername(network) ? "yes" : "no");
+	NSMutableDictionary *out = [NSMutableDictionary new];
+
+	[out setObject:(__bridge_transfer NSString *)WiFiNetworkGetSSID(network) forKey:@"SSID"];
+	[out setObject:(__bridge_transfer NSString *)networkBSSIDRef(network) forKey:@"BSSID"];
+	[out setObject:WiFiNetworkIsWEP(network) ? @"yes" : @"no" forKey:@"WEP"];
+	[out setObject:WiFiNetworkIsWPA(network) ? @"yes" : @"no" forKey:@"WPA"];
+	[out setObject:WiFiNetworkIsEAP(network) ? @"yes" : @"no" forKey:@"EAP"];
+	[out setObject:WiFiNetworkIsApplePersonalHotspot(network) ? @"yes" : @"no" forKey:@"Hostspot"];
+	[out setObject:WiFiNetworkIsAdHoc(network) ? @"yes" : @"no" forKey:@"AdHoc"];
+	[out setObject:WiFiNetworkIsHidden(network) ? @"yes" : @"no" forKey:@"Hidden"];
+	[out setObject:WiFiNetworkRequiresPassword(network) ? @"yes" : @"no" forKey:@"RequiresPassword"];
+	[out setObject:WiFiNetworkRequiresUsername(network) ? @"yes" : @"no" forKey:@"RequiresUsername"];
 
 	CFDictionaryRef data =
 		(CFDictionaryRef)WiFiDeviceClientCopyProperty(client, CFSTR("RSSI"));
@@ -119,24 +118,15 @@ int wifiinfo(bool current, int argc, char **argv) {
 	int bars = (int)ceilf(strength * -3.0f);
 	bars = MAX(1, MIN(bars, 3));
 
-	printf("Strength: %f dBm\n", strength);
-	printf("Bars: %d\n", bars);
-	printf("Channel: %i\n",
-		   [(__bridge_transfer NSNumber *)WiFiNetworkGetProperty(
-			   network, CFSTR("CHANNEL")) intValue]);
-	printf("AP Mode: %i\n",
-		   [(__bridge_transfer NSNumber *)WiFiNetworkGetProperty(
-			   network, CFSTR("AP_MODE")) intValue]);
-	printf("Interface: %s\n",
-		   [(__bridge_transfer NSString *)WiFiDeviceClientGetInterfaceName(
-			   client) UTF8String]);
-	printf("Last Association Date: %s\n",
-		   [(__bridge_transfer NSDate *)WiFiNetworkGetLastAssociationDate(
-				network) descriptionWithLocale:nil]
-			   .UTF8String);
-	printf("Password: %s\n",
-		   [(__bridge_transfer NSString *)WiFiNetworkCopyPassword(network)
-			   UTF8String]);
+	[out setObject:[NSString stringWithFormat:@"%f dBm", strength] forKey:@"Strength"];
+	[out setObject:[NSString stringWithFormat:@"%d", bars] forKey:@"Bars"];
+	[out setObject:(__bridge_transfer NSNumber *)WiFiNetworkGetProperty(network, CFSTR("CHANNEL")) forKey:@"Channel"];
+	[out setObject:(__bridge_transfer NSNumber *)WiFiNetworkGetProperty(network, CFSTR("AP_MODE")) forKey:@"APMode"];
+	[out setObject:(__bridge_transfer NSString *)WiFiDeviceClientGetInterfaceName(client) forKey:@"APMode"];
+	[out setObject:(__bridge_transfer NSDate*)WiFiNetworkGetLastAssociationDate(network) forKey:@"LastAssociationDate"];
+	[out setObject:(__bridge_transfer NSString *)WiFiNetworkCopyPassword(network) forKey:@"Password"];
+
+	[NCOutput printArray:@[out] withJSON:json];
 
 	return 0;
 }

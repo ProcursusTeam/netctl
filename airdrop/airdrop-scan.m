@@ -6,7 +6,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../include/output.h"
+#include "output.h"
+#include "netctl.h"
 
 CFMutableArrayRef discovered;
 
@@ -35,7 +36,7 @@ void airdropBrowserCallBack(SFBrowserRef browser, SFNodeRef node, CFStringRef pr
 }
 
 int airdropscan(int argc, char **argv) {
-	int ch, index;
+	int ch;
 	int timeout = 30;
 	const char *errstr;
 
@@ -46,7 +47,7 @@ int airdropscan(int argc, char **argv) {
 		{ NULL, 0, NULL, 0 }
 	};
 
-	while ((ch = getopt_long(argc, argv, "t:", opts, &index)) != -1) {
+	while ((ch = getopt_long(argc, argv, "t:j", opts, NULL)) != -1) {
 		switch (ch) {
 			case 't':
 				timeout = strtonum(optarg, 0, INT_MAX, &errstr);
@@ -73,7 +74,7 @@ int airdropscan(int argc, char **argv) {
 	CFRelease(discovered);
 	SFBrowserInvalidate(browser);
 
-	[NCOutput printArray:devices withJSON:YES];
+	[NCOutput printArray:devices withJSON:json];
 
 	return 0;
 }

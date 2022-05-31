@@ -1,6 +1,10 @@
 #include <err.h>
+#include <getopt.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "include/netctl.h"
 
 int wifi(int, char **);
 int cellular(int, char **);
@@ -11,7 +15,26 @@ int airplane(char *);
 
 void usage(void);
 
+bool json = false;
+
 int main(int argc, char *argv[]) {
+	int ch;
+	struct option opts[] = {
+		{ "json", no_argument, NULL, 'j' },
+		{ NULL, 0, NULL, 0 }
+	};
+
+	while ((ch = getopt_long(argc, argv, "+j", opts, NULL)) != -1) {
+		switch (ch) {
+			case 'j':
+				json = true;
+				break;
+		}
+	}
+
+	argc -= optind;
+	argv += optind;
+
 	if (argc < 2) {
 		usage();
 		return 1;

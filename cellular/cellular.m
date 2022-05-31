@@ -5,6 +5,8 @@
 #include <err.h>
 #include <output.h>
 
+#include "netctl.h"
+
 static CTServerConnectionRef serverConnection;
 
 static int number(void) {
@@ -66,7 +68,7 @@ static int info(void) {
 		i++;
 	}
 
-	[NCOutput printArray:array withJSON:NO];
+	[NCOutput printArray:array withJSON:json];
 	CFRelease(registrationStatus);
 	return 0;
 }
@@ -110,7 +112,7 @@ static int cells(void) {
 			      @{ @"PID" : pid },
 			      @{ @"TAC" : tac },
 			   @{ @"UARFCN" : uarfcn },
-			     ]}] withJSON:YES];
+			     ]}] withJSON:json];
 
 	}
 

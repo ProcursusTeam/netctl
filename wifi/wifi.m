@@ -1,10 +1,12 @@
-#include "wifi.h"
-
 #import <Foundation/Foundation.h>
 #import <MobileWiFi/MobileWiFi.h>
 #include <err.h>
 #include <stdbool.h>
 #include <stdio.h>
+
+#include "wifi.h"
+#include "output.h"
+#include "netctl.h"
 
 CFArrayRef scanNetworks;
 WiFiManagerRef manager;
@@ -60,13 +62,16 @@ int wifi(int argc, char *argv[]) {
 int wifilist(void) {
 	CFArrayRef networks = WiFiManagerClientCopyNetworks(manager);
 
+	NSMutableArray *list = [NSMutableArray array];
+
 	for (int i = 0; i < CFArrayGetCount(networks); i++) {
-		printf(
-			"%s : %s\n",
-			[(__bridge_transfer NSString *)WiFiNetworkGetSSID((
-				WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)) UTF8String],
-			networkBSSID((WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)));
+		[list addObjectsFromArray:@[
+			@{ @"SSID" : (__bridge_transfer NSString*)WiFiNetworkGetSSID((WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)) },
+			@{ @"BSSID" : (__bridge_transfer NSString*)networkBSSIDRef((WiFiNetworkRef)CFArrayGetValueAtIndex(networks, i)) },
+		]];
 	}
+
+	[NCOutput printArray:list withJSON:json];
 
 	return 0;
 }
