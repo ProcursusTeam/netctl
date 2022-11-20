@@ -1,0 +1,7 @@
+netctl
+*.o
+*.dSYM
+
+.cache
+compile_commands.json
+.vscode
